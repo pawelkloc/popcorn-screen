@@ -1,4 +1,4 @@
-# PopcornScreen
+# Popcorn Screen
 
 An iOS app for browsing and saving your favorite movies and TV series.
 
