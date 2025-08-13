@@ -52,6 +52,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4195EC342E4110C100E881E5 /* Build configuration list for PBXNativeTarget "PopcornScreen" */;
 			buildPhases = (
+				41D1B39B2E4CCFE000AFECDC /* Run SwiftLint */,
 				4195EC252E4110C000E881E5 /* Sources */,
 				4195EC262E4110C000E881E5 /* Frameworks */,
 				4195EC272E4110C000E881E5 /* Resources */,
@@ -113,6 +114,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		41D1B39B2E4CCFE000AFECDC /* Run SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)",
+			);
+			name = "Run SwiftLint";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Texport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\n\necho \"Running SwiftLint (sandbox ON + recursive inputs)...\"\n\nif which swiftlint >/dev/null; then\n  swiftlint lint --reporter xcode\nelse\n  echo \"warning: SwiftLint not installed, run 'brew install swiftlint'\"\nfiype a script or drag a script file from your workspace to insert its path.\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4195EC252E4110C000E881E5 /* Sources */ = {
@@ -272,6 +296,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES;
 			};
 			name = Debug;
 		};
@@ -301,6 +326,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES;
 			};
 			name = Release;
 		};
