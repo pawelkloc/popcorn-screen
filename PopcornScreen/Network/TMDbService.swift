@@ -67,4 +67,3 @@ struct TMDbService {
 struct MovieResponse: Decodable {
     let results: [Movie]
 }
-

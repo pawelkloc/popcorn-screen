@@ -12,13 +12,13 @@ class MoviesViewModel: ObservableObject {
     @Published var movies: [Movie] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
+
     private let tmdbService = TMDbService()
-    
+
     func loadPopularMovies(page: Int = 1) {
         isLoading = true
         errorMessage = nil
-        
+
         Task {
             do {
                 let fetchedMovies = try await tmdbService.fetchPopularMovies(page: page)
@@ -31,4 +31,3 @@ class MoviesViewModel: ObservableObject {
         }
     }
 }
-
