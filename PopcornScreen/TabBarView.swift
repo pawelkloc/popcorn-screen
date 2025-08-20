@@ -13,7 +13,6 @@ enum Tab: Hashable {
 
 struct TabBarView: View {
     @State private var selection: Tab = .movies
-
     var body: some View {
         TabView(selection: $selection) {
             MoviesView()

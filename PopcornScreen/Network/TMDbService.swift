@@ -39,5 +39,32 @@ struct TMDbService {
         guard let url = components.url else {
             throw FetchError.badResponse
         }
+
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                throw FetchError.badResponse
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        do {
+            let moviesResponse = try decoder.decode(MovieResponse.self, from: data)
+            print("Fetched \(moviesResponse.results) movies from TMDb")
+            return moviesResponse.results
+        } catch {
+            throw FetchError.decodingError(error)
+        }
     }
 }
+
+// MARK: - MovieResponse
+struct MovieResponse: Decodable {
+    let results: [Movie]
+}
+
