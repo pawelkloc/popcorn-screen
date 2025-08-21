@@ -105,6 +105,12 @@ struct TMDbService {
         print("Fetched \(response.results.count) movies from TMDb")
         return response.results
     }
+
+    func fetchPopularTV(page: Int) async throws -> [TVShow] {
+        let response: TVResponse = try await fetch(TVResponse.self, endpoint: .discoverTV, page: page)
+        print("Fetched \(response.results.count) TV shows from TMDb")
+        return response.results
+    }
 }
 
 // MARK: - MovieResponse
