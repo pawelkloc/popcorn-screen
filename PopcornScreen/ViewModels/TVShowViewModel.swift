@@ -29,4 +29,19 @@ class TVShowViewModel: ObservableObject {
             isLoading = false
         }
     }
+
+    func searchTV(query: String, page: Int = 1) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let fetched = try await tmdbService.searchTV(query: query, page: page)
+                self.shows = fetched
+            } catch {
+                print("Error searching TV shows: \(error)")
+                self.errorMessage = "Failed to search TV shows"
+            }
+            isLoading = false
+        }
+    }
 }

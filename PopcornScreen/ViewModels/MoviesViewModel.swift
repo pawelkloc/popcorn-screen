@@ -30,4 +30,20 @@ class MoviesViewModel: ObservableObject {
             isLoading = false
         }
     }
+
+    func searchMovies(query: String, page: Int = 1) {
+        isLoading = true
+        errorMessage = nil
+
+        Task {
+            do {
+                let fetchedMovies = try await tmdbService.searchMovies(query: query, page: page)
+                self.movies = fetchedMovies
+            } catch {
+                print("Error searching movies: \(error)")
+                self.errorMessage = "Failed to search movies"
+            }
+            isLoading = false
+        }
+    }
 }

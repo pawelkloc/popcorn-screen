@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SeriesView: View {
     @StateObject private var viewModel = TVShowViewModel()
+    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
@@ -17,6 +18,10 @@ struct SeriesView: View {
                 Text(show.name)
             }
             .navigationTitle("Series")
+            .searchable(text: $searchText)
+            .onSubmit(of: .search) {
+                viewModel.searchTV(query: searchText)
+            }
             .task {
                 viewModel.loadPopularTV()
             }

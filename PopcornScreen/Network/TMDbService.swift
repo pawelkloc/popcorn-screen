@@ -112,4 +112,26 @@ struct TMDbService {
         print("Fetched \(response.results.count) TV shows from TMDb")
         return response.results
     }
+
+    func searchMovies(query: String, page: Int = 1) async throws -> [Movie] {
+        let response: MovieResponse = try await fetch(
+            MovieResponse.self,
+            endpoint: .searchMovies,
+            page: page,
+            query: query
+        )
+        print("Found \(response.results.count) movies for query: \(query)")
+        return response.results
+    }
+
+    func searchTV(query: String, page: Int = 1) async throws -> [TVShow] {
+        let response: TVResponse = try await fetch(
+            TVResponse.self,
+            endpoint: .searchTV,
+            page: page,
+            query: query
+        )
+        print("Found \(response.results.count) TV shows for query: \(query)")
+        return response.results
+    }
 }
