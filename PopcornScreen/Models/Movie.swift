@@ -55,3 +55,8 @@ struct Movie: Identifiable, Decodable {
         return formatter
     }()
 }
+
+struct MovieResponse: Decodable {
+    let results: [Movie]
+}
+

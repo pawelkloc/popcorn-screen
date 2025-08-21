@@ -55,17 +55,17 @@ struct TMDbService {
                 ]
             }
         }
-        
+
         func makeComponents(baseURL: URL, page: Int?, query: String?) -> URLComponents {
             var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
             var items = defaultQueryItems
             if let page { items.append(URLQueryItem(name: "page", value: String(page))) }
-            if let q = query, !q.isEmpty { items.append(URLQueryItem(name: "query", value: q)) }
+            if let que = query, !que.isEmpty { items.append(URLQueryItem(name: "query", value: que)) }
             components.queryItems = items
             return components
         }
     }
-    
+
     // MARK: - Request Factory
     private func makeRequest(for endpoint: Endpoint, page: Int? = nil, query: String? = nil) throws -> URLRequest {
         let components = endpoint.makeComponents(baseURL: baseURL, page: page, query: query)
@@ -75,9 +75,10 @@ struct TMDbService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
     }
-    
+
     // MARK: - Generic Fetch
-    func fetch<T: Decodable>(_ type: T.Type, endpoint: Endpoint, page: Int? = nil, query: String? = nil) async throws -> T {
+    func fetch<T: Decodable>(_ type: T.Type, endpoint: Endpoint, page: Int? = nil, query: String? = nil)
+            async throws -> T {
         let request = try makeRequest(for: endpoint, page: page, query: query)
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
@@ -91,15 +92,15 @@ struct TMDbService {
             throw FetchError.decodingError(error)
         }
     }
-    
+
     init() {
         guard let token = Bundle.main.object(forInfoDictionaryKey: "TMDB_TOKEN") as? String else {
             fatalError("TMDB_TOKEN not found in Info.plist")
         }
-        
+
         self.bearerToken = token
     }
-    
+
     func fetchPopularMovies(page: Int) async throws -> [Movie] {
         let response: MovieResponse = try await fetch(MovieResponse.self, endpoint: .discoverMovies, page: page)
         print("Fetched \(response.results.count) movies from TMDb")
@@ -111,9 +112,4 @@ struct TMDbService {
         print("Fetched \(response.results.count) TV shows from TMDb")
         return response.results
     }
-}
-
-// MARK: - MovieResponse
-struct MovieResponse: Decodable {
-    let results: [Movie]
 }
