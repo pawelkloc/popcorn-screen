@@ -12,12 +12,13 @@ struct MoviesView: View {
 
     var body: some View {
         NavigationStack {
-            Text("Movies")
-                .navigationTitle("Movies")
+
+
 
             List(viewModel.movies) { movie in
                 Text(movie.title)
             }
+            .navigationTitle("Movies")
             .task {
                 viewModel.loadPopularMovies()
             }

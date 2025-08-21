@@ -8,10 +8,18 @@
 import SwiftUI
 
 struct SeriesView: View {
+    @StateObject private var viewModel = TVShowViewModel()
+
     var body: some View {
         NavigationStack {
-            Text("Series")
-                .navigationTitle("Series")
+
+            List(viewModel.shows) { show in
+                Text(show.name)
+            }
+            .navigationTitle("Series")
+            .task {
+                viewModel.loadPopularTV()
+            }
         }
     }
 }
