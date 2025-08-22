@@ -9,19 +9,18 @@ import SwiftUI
 
 struct MoviesView: View {
     @StateObject private var viewModel = MoviesViewModel()
-    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
 
-            List(viewModel.movies) { movie in
+            List(viewModel.filteredMovies) { movie in
                 Text(movie.title)
             }
             .navigationTitle("Movies")
-            .searchable(text: $searchText)
-            .onSubmit(of: .search, {
-                viewModel.searchMovies(query: searchText)
-            })
+            .searchable(text: $viewModel.searchText)
+            .onSubmit(of: .search) {
+                viewModel.searchMovies(query: viewModel.searchText)
+            }
             .task {
                 viewModel.loadPopularMovies()
             }

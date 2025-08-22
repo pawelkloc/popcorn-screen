@@ -46,8 +46,8 @@ class SearchViewModel: ObservableObject {
         errorMessage = nil
         Task {
             do {
-                async let mov: [Movie] = tmdbService.searchMovies(query: query, page: page)
-                async let sho: [TVShow] = tmdbService.searchTV(query: query, page: page)
+                async let mov: [Movie] = tmdbService.searchMovies(query: query)
+                async let sho: [TVShow] = tmdbService.searchTV(query: query)
                 let (mv, sh) = try await (mov, sho)
                 self.movies = mv
                 self.shows = sh

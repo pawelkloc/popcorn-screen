@@ -144,11 +144,11 @@ struct TMDbService {
         return response.results
     }
 
-    func searchMovies(query: String, page: Int = 1) async throws -> [Movie] {
+    func searchMovies(query: String) async throws -> [Movie] {
         let response: MovieResponse = try await fetch(
             MovieResponse.self,
             endpoint: .searchMovies,
-            page: page,
+            page: 1,
             query: query
         )
         print("Found \(response.results.count) movies for query: \(query)")

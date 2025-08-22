@@ -9,18 +9,17 @@ import SwiftUI
 
 struct SeriesView: View {
     @StateObject private var viewModel = TVShowViewModel()
-    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
 
-            List(viewModel.shows) { show in
+            List(viewModel.filteredTVShows) { show in
                 Text(show.name)
             }
             .navigationTitle("Series")
-            .searchable(text: $searchText)
+            .searchable(text: $viewModel.searchText)
             .onSubmit(of: .search) {
-                viewModel.searchTV(query: searchText)
+                viewModel.searchTV(query: viewModel.searchText)
             }
             .task {
                 viewModel.loadPopularTV()

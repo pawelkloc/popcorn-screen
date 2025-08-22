@@ -10,6 +10,10 @@ import Foundation
 @MainActor
 class MoviesViewModel: ObservableObject {
     @Published var movies: [Movie] = []
+    @Published var filteredMovies: [Movie] = []
+    @Published var searchText: String = "" {
+        didSet { filterMovies() }
+    }
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -23,6 +27,7 @@ class MoviesViewModel: ObservableObject {
             do {
                 let fetchedMovies = try await tmdbService.fetchPopularMovies(page: page, sort: sort)
                 self.movies = fetchedMovies
+                self.filteredMovies = fetchedMovies
             } catch {
                 print("Error fetching movies: \(error)")
                 self.errorMessage = "Failed to load movies"
@@ -32,18 +37,18 @@ class MoviesViewModel: ObservableObject {
     }
 
     func searchMovies(query: String, page: Int = 1) {
-        isLoading = true
+        isLoading = false
         errorMessage = nil
+        self.searchText = query
+    }
 
-        Task {
-            do {
-                let fetchedMovies = try await tmdbService.searchMovies(query: query, page: page)
-                self.movies = fetchedMovies
-            } catch {
-                print("Error searching movies: \(error)")
-                self.errorMessage = "Failed to search movies"
-            }
-            isLoading = false
+    private func filterMovies() {
+        let newQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !newQuery.isEmpty else {
+            filteredMovies = movies
+            return
         }
+
+        filteredMovies = movies.filter { $0.title.localizedCaseInsensitiveContains(newQuery) }
     }
 }
