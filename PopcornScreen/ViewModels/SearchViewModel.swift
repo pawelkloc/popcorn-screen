@@ -23,14 +23,14 @@ class SearchViewModel: ObservableObject {
         $query
             .removeDuplicates()
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
-            .sink { [weak self] que in
-                self?.handleQueryChange(que)
+            .sink { [weak self] newQuery in
+                self?.handleQueryChange(newQuery)
             }
             .store(in: &cancellables)
     }
 
-    private func handleQueryChange(_ que: String) {
-        let trimmed = que.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func handleQueryChange(_ newQuery: String) {
+        let trimmed = newQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             movies.removeAll()
             shows.removeAll()

@@ -15,13 +15,13 @@ class MoviesViewModel: ObservableObject {
 
     private let tmdbService = TMDbService()
 
-    func loadPopularMovies(page: Int = 1) {
+    func loadPopularMovies(page: Int = 1, sort: TMDbService.Endpoint.SortOption? = nil) {
         isLoading = true
         errorMessage = nil
 
         Task {
             do {
-                let fetchedMovies = try await tmdbService.fetchPopularMovies(page: page)
+                let fetchedMovies = try await tmdbService.fetchPopularMovies(page: page, sort: sort)
                 self.movies = fetchedMovies
             } catch {
                 print("Error fetching movies: \(error)")

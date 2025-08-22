@@ -12,17 +12,17 @@ struct TMDbService {
         case missingToken
         case decodingError(Error)
     }
-    
+
     private let baseURL = URL(string: "https://api.themoviedb.org/3")!
     private let bearerToken: String
-    
+
     // MARK: - Endpoint
     enum Endpoint {
         case discoverMovies
         case discoverTV
         case searchMovies
         case searchTV
-        
+
         var path: String {
             switch self {
             case .discoverMovies: return "/discover/movie"
@@ -31,7 +31,16 @@ struct TMDbService {
             case .searchTV:       return "/search/tv"
             }
         }
-        
+
+        enum SortOption {
+            case releaseDateAscending
+            case releaseDateDescending
+            case ratingAscending
+            case ratingDescending
+            case alphabeticalAscending
+            case alphabeticalDescending
+        }
+
         /// Default query items for each endpoint (page and query are added separately when provided).
         var defaultQueryItems: [URLQueryItem] {
             switch self {
@@ -56,19 +65,41 @@ struct TMDbService {
             }
         }
 
-        func makeComponents(baseURL: URL, page: Int?, query: String?) -> URLComponents {
+        func sortQueryItem(for option: SortOption) -> URLQueryItem? {
+            switch option {
+            case .releaseDateAscending:
+                return URLQueryItem(name: "sort_by", value: "release_date.asc")
+            case .releaseDateDescending:
+                return URLQueryItem(name: "sort_by", value: "release_date.desc")
+            case .ratingAscending:
+                return URLQueryItem(name: "sort_by", value: "vote_average.asc")
+            case .ratingDescending:
+                return URLQueryItem(name: "sort_by", value: "vote_average.desc")
+            case .alphabeticalAscending:
+                return URLQueryItem(name: "sort_by", value: "original_title.asc")
+            case .alphabeticalDescending:
+                return URLQueryItem(name: "sort_by", value: "original_title.desc")
+            }
+        }
+
+        func makeComponents(baseURL: URL, page: Int?, query: String?, sort: SortOption? = nil) -> URLComponents {
             var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
             var items = defaultQueryItems
             if let page { items.append(URLQueryItem(name: "page", value: String(page))) }
             if let que = query, !que.isEmpty { items.append(URLQueryItem(name: "query", value: que)) }
+            if let sortOption = sort {
+                if let sortItem = sortQueryItem(for: sortOption) {
+                    items.append(sortItem)
+                }
+            }
             components.queryItems = items
             return components
         }
     }
 
     // MARK: - Request Factory
-    private func makeRequest(for endpoint: Endpoint, page: Int? = nil, query: String? = nil) throws -> URLRequest {
-        let components = endpoint.makeComponents(baseURL: baseURL, page: page, query: query)
+    private func makeRequest(for endpoint: Endpoint, page: Int? = nil, query: String? = nil, sort: Endpoint.SortOption? = nil) throws -> URLRequest {
+        let components = endpoint.makeComponents(baseURL: baseURL, page: page, query: query, sort: sort)
         guard let url = components.url else { throw FetchError.badResponse }
         var request = URLRequest(url: url)
         request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
@@ -77,9 +108,9 @@ struct TMDbService {
     }
 
     // MARK: - Generic Fetch
-    func fetch<T: Decodable>(_ type: T.Type, endpoint: Endpoint, page: Int? = nil, query: String? = nil)
+    func fetch<T: Decodable>(_ type: T.Type, endpoint: Endpoint, page: Int? = nil, query: String? = nil, sort: Endpoint.SortOption? = nil)
             async throws -> T {
-        let request = try makeRequest(for: endpoint, page: page, query: query)
+                let request = try makeRequest(for: endpoint, page: page, query: query, sort: sort)
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw FetchError.badResponse
@@ -101,14 +132,14 @@ struct TMDbService {
         self.bearerToken = token
     }
 
-    func fetchPopularMovies(page: Int) async throws -> [Movie] {
-        let response: MovieResponse = try await fetch(MovieResponse.self, endpoint: .discoverMovies, page: page)
+    func fetchPopularMovies(page: Int, sort: Endpoint.SortOption? = nil) async throws -> [Movie] {
+        let response: MovieResponse = try await fetch(MovieResponse.self, endpoint: .discoverMovies, page: page, sort: sort)
         print("Fetched \(response.results.count) movies from TMDb")
         return response.results
     }
 
-    func fetchPopularTV(page: Int) async throws -> [TVShow] {
-        let response: TVResponse = try await fetch(TVResponse.self, endpoint: .discoverTV, page: page)
+    func fetchPopularTV(page: Int, sort: Endpoint.SortOption? = nil) async throws -> [TVShow] {
+        let response: TVResponse = try await fetch(TVResponse.self, endpoint: .discoverTV, page: page, sort: sort)
         print("Fetched \(response.results.count) TV shows from TMDb")
         return response.results
     }

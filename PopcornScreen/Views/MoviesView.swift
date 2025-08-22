@@ -18,7 +18,7 @@ struct MoviesView: View {
                 Text(movie.title)
             }
             .navigationTitle("Movies")
-            .searchable(text: $searchText, prompt: "Search movies")
+            .searchable(text: $searchText)
             .onSubmit(of: .search, {
                 viewModel.searchMovies(query: searchText)
             })

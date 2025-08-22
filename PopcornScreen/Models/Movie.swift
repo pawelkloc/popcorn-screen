@@ -59,4 +59,3 @@ struct Movie: Identifiable, Decodable {
 struct MovieResponse: Decodable {
     let results: [Movie]
 }
-
