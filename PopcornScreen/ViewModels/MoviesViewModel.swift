@@ -17,7 +17,11 @@ class MoviesViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    private let tmdbService = TMDbService()
+    private let service: TMDbService
+
+    init(service: TMDbService = .shared) {
+        self.service = service
+    }
 
     func loadPopularMovies(page: Int = 1, sort: TMDbService.Endpoint.SortOption? = nil) {
         isLoading = true
@@ -25,7 +29,7 @@ class MoviesViewModel: ObservableObject {
 
         Task {
             do {
-                let fetchedMovies = try await tmdbService.fetchPopularMovies(page: page, sort: sort)
+                let fetchedMovies = try await service.fetchPopularMovies(page: page, sort: sort)
                 self.movies = fetchedMovies
                 self.filteredMovies = fetchedMovies
             } catch {
@@ -50,5 +54,21 @@ class MoviesViewModel: ObservableObject {
         }
 
         filteredMovies = movies.filter { $0.title.localizedCaseInsensitiveContains(newQuery) }
+    }
+
+    func loadMoviesByGenres(_ genreIDs: [Int]) {
+        isLoading = true
+        errorMessage = nil
+
+        Task {
+            do {
+                let response = try await service.fetchMoviesByGenres(genreIDs: genreIDs)
+                self.movies = response.results
+            } catch {
+                print("Error: \(error)")
+                self.errorMessage = "Couldn't load movies"
+            }
+            isLoading = false
+        }
     }
 }

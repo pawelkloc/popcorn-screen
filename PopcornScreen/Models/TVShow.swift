@@ -13,6 +13,8 @@ struct TVShow: Identifiable, Decodable {
     let overview: String
     let posterPath: String?
     let firstAirDate: String?
+
+    //  TODO: Add coding keys and init from decoder if needed
 }
 
 struct TVResponse: Decodable {

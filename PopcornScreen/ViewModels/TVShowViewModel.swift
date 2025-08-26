@@ -17,7 +17,11 @@ class TVShowViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    private let tmdbService = TMDbService()
+    private let service: TMDbService
+
+    init(service: TMDbService = .shared) {
+        self.service = service
+    }
 
     func loadPopularTV(page: Int = 1, sort: TMDbService.Endpoint.SortOption? = nil) {
         isLoading = true
@@ -25,7 +29,7 @@ class TVShowViewModel: ObservableObject {
 
         Task {
             do {
-                let fetchedTVSeries = try await tmdbService.fetchPopularTV(page: page, sort: sort)
+                let fetchedTVSeries = try await service.fetchPopularTV(page: page, sort: sort)
                 self.shows = fetchedTVSeries
                 self.filteredTVShows = fetchedTVSeries
             } catch {

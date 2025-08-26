@@ -6,22 +6,34 @@
 //
 import Foundation
 
-struct TMDbService {
+final class TMDbService {
+    static let shared = TMDbService()
+
+    private init() {
+        guard let token = Bundle.main.object(forInfoDictionaryKey: "TMDB_TOKEN") as? String else {
+            fatalError("TMDB_TOKEN not found in Info.plist")
+        }
+
+        self.bearerToken = token
+    }
+
+    private let baseURL = URL(string: "https://api.themoviedb.org/3")!
+    private let bearerToken: String
+
+    // MARK: - Error Handling
     enum FetchError: Error {
         case badResponse
         case missingToken
         case decodingError(Error)
     }
 
-    private let baseURL = URL(string: "https://api.themoviedb.org/3")!
-    private let bearerToken: String
-
-    // MARK: - Endpoint
+    // MARK: - API Endpoints
     enum Endpoint {
         case discoverMovies
         case discoverTV
         case searchMovies
         case searchTV
+        case movieGenres
 
         var path: String {
             switch self {
@@ -29,6 +41,7 @@ struct TMDbService {
             case .discoverTV:     return "/discover/tv"
             case .searchMovies:   return "/search/movie"
             case .searchTV:       return "/search/tv"
+            case .movieGenres:    return "/genre/movie/list"
             }
         }
 
@@ -62,6 +75,8 @@ struct TMDbService {
                     URLQueryItem(name: "include_adult", value: "false"),
                     URLQueryItem(name: "language", value: "en_US")
                 ]
+            case .movieGenres:
+                return [URLQueryItem(name: "language", value: "en_US")]
             }
         }
 
@@ -97,7 +112,7 @@ struct TMDbService {
         }
     }
 
-    // MARK: - Request Factory
+    // MARK: - Request Building
     private func makeRequest(for endpoint: Endpoint, page: Int? = nil, query: String? = nil, sort: Endpoint.SortOption? = nil) throws -> URLRequest {
         let components = endpoint.makeComponents(baseURL: baseURL, page: page, query: query, sort: sort)
         guard let url = components.url else { throw FetchError.badResponse }
@@ -108,9 +123,25 @@ struct TMDbService {
     }
 
     // MARK: - Generic Fetch
-    func fetch<T: Decodable>(_ type: T.Type, endpoint: Endpoint, page: Int? = nil, query: String? = nil, sort: Endpoint.SortOption? = nil)
-            async throws -> T {
-                let request = try makeRequest(for: endpoint, page: page, query: query, sort: sort)
+    func fetch<T: Decodable>(
+        _ type: T.Type,
+        endpoint: Endpoint,
+        page: Int? = nil,
+        query: String? = nil,
+        sort: Endpoint.SortOption? = nil,
+        queryItems: [URLQueryItem]? = nil
+    ) async throws -> T {
+        var components = endpoint.makeComponents(baseURL: baseURL, page: page, query: query, sort: sort)
+
+        if let queryItems = queryItems {
+            components.queryItems = queryItems
+        }
+
+        guard let url = components.url else { throw FetchError.badResponse }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw FetchError.badResponse
@@ -124,14 +155,7 @@ struct TMDbService {
         }
     }
 
-    init() {
-        guard let token = Bundle.main.object(forInfoDictionaryKey: "TMDB_TOKEN") as? String else {
-            fatalError("TMDB_TOKEN not found in Info.plist")
-        }
-
-        self.bearerToken = token
-    }
-
+    // MARK: - Specific Fetch Methods
     func fetchPopularMovies(page: Int, sort: Endpoint.SortOption? = nil) async throws -> [Movie] {
         let response: MovieResponse = try await fetch(MovieResponse.self, endpoint: .discoverMovies, page: page, sort: sort)
         print("Fetched \(response.results.count) movies from TMDb")
@@ -144,6 +168,7 @@ struct TMDbService {
         return response.results
     }
 
+    // MARK: - Search Methods
     func searchMovies(query: String) async throws -> [Movie] {
         let response: MovieResponse = try await fetch(
             MovieResponse.self,
@@ -164,5 +189,34 @@ struct TMDbService {
         )
         print("Found \(response.results.count) TV shows for query: \(query)")
         return response.results
+    }
+
+    // MARK: - Genre Fetching
+    func fetchMovieGenres(language: String = "en_US") async throws -> [Genre] {
+        let response: GenreResponse = try await fetch(
+            GenreResponse.self,
+            endpoint: .movieGenres
+        )
+        print("Fetched \(response.genres.count) genres from TMDb")
+        return response.genres
+    }
+
+    func fetchMoviesByGenres(
+        genreIDs: [Int],
+        page: Int = 1,
+        language: String = "en_US"
+    ) async throws -> MovieResponse {
+        let genreString = genreIDs.map { String($0) }.joined(separator: ",")
+        let queryItems = [
+            URLQueryItem(name: "with_genres", value: genreString),
+            URLQueryItem(name: "language", value: language),
+            URLQueryItem(name: "page", value: String(page))
+        ]
+
+        return try await fetch(
+            MovieResponse.self,
+            endpoint: .discoverMovies,
+            queryItems: queryItems
+        )
     }
 }

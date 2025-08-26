@@ -16,10 +16,12 @@ class SearchViewModel: ObservableObject {
     @Published var isSearching: Bool = false
     @Published var errorMessage: String?
 
-    private let tmdbService = TMDbService()
+    private let service: TMDbService
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
+    init(service: TMDbService = .shared) {
+        self.service = service
+
         $query
             .removeDuplicates()
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
@@ -27,6 +29,7 @@ class SearchViewModel: ObservableObject {
                 self?.handleQueryChange(newQuery)
             }
             .store(in: &cancellables)
+
     }
 
     private func handleQueryChange(_ newQuery: String) {
@@ -46,8 +49,8 @@ class SearchViewModel: ObservableObject {
         errorMessage = nil
         Task {
             do {
-                async let mov: [Movie] = tmdbService.searchMovies(query: query)
-                async let sho: [TVShow] = tmdbService.searchTV(query: query)
+                async let mov: [Movie] = service.searchMovies(query: query)
+                async let sho: [TVShow] = service.searchTV(query: query)
                 let (mv, sh) = try await (mov, sho)
                 self.movies = mv
                 self.shows = sh
