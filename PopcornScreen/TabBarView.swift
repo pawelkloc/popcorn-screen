@@ -47,6 +47,7 @@ struct TabBarView: View {
 
         }
         .tint(.primary)
+        .environmentObject(FavoriteMoviesManager())
     }
 }
 

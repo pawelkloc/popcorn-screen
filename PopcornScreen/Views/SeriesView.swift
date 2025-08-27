@@ -9,10 +9,10 @@ import SwiftUI
 
 struct SeriesView: View {
     @StateObject private var viewModel = TVShowViewModel()
+//    @EnvironmentObject var favoriteManager: FavoriteSeriesManager
 
     var body: some View {
         NavigationStack {
-
             List {
                 if viewModel.isLoading {
                     ProgressView("Loading series…")
@@ -30,7 +30,21 @@ struct SeriesView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                 } else {
                     ForEach(viewModel.filteredTVShows) { show in
-                        Text(show.name)
+                        HStack {Text(show.name)
+                            Spacer()
+//                            Button(action: {
+//                                if favoriteManager.isFavorite(show) {
+//                                    favoriteManager.remove(serial: show)
+//                                } else {
+//                                    favoriteManager.add(serial: show)
+//                                }
+//                            }, label: {
+//                                Image(systemName: favoriteManager.isFavorite(show)
+//                                      ? "heart.fill" : "heart")
+//                                .foregroundColor(.red)
+//                            })
+//                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
@@ -48,4 +62,5 @@ struct SeriesView: View {
 
 #Preview {
     SeriesView()
+//        .environmentObject(FavoriteSeriesManager())
 }

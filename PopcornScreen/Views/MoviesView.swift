@@ -9,10 +9,10 @@ import SwiftUI
 
 struct MoviesView: View {
     @StateObject private var viewModel = MoviesViewModel()
+    @EnvironmentObject var favoriteManager: FavoriteMoviesManager
 
     var body: some View {
         NavigationStack {
-
             List {
                 if viewModel.isLoading {
                     ProgressView("Loading films…")
@@ -30,7 +30,21 @@ struct MoviesView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else {
                     ForEach(viewModel.filteredMovies) { movie in
-                        Text(movie.title)
+                        HStack {
+                            Text(movie.title)
+                            Spacer()
+                            Button(action: {
+                                if favoriteManager.isFavorite(movie) {
+                                    favoriteManager.remove(movie: movie)
+                                } else {
+                                    favoriteManager.add(movie: movie)
+                                }
+                            }, label: {
+                                Image(systemName: favoriteManager.isFavorite(movie) ? "heart.fill" : "heart")
+                                    .foregroundColor(.red)
+                            })
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
@@ -48,4 +62,5 @@ struct MoviesView: View {
 
 #Preview {
     MoviesView()
+        .environmentObject(FavoriteMoviesManager())
 }
