@@ -13,8 +13,26 @@ struct MoviesView: View {
     var body: some View {
         NavigationStack {
 
-            List(viewModel.filteredMovies) { movie in
-                Text(movie.title)
+            List {
+                if viewModel.isLoading {
+                    ProgressView("Loading films…")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else if viewModel.filteredMovies.isEmpty {
+                    ContentUnavailableView(
+                        "No movies",
+                        systemImage: "film",
+                        description: Text("Try a different search or refresh.")
+                    )
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else {
+                    ForEach(viewModel.filteredMovies) { movie in
+                        Text(movie.title)
+                    }
+                }
             }
             .navigationTitle("Movies")
             .searchable(text: $viewModel.searchText)

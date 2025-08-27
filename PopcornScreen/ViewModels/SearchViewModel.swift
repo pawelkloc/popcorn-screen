@@ -51,9 +51,9 @@ class SearchViewModel: ObservableObject {
             do {
                 async let mov: [Movie] = service.searchMovies(query: query)
                 async let sho: [TVShow] = service.searchTV(query: query)
-                let (mv, sh) = try await (mov, sho)
-                self.movies = mv
-                self.shows = sh
+                let (movie, show) = try await (mov, sho)
+                self.movies = movie
+                self.shows = show
                 self.isSearching = false
             } catch {
                 print("Error searching: \(error)")

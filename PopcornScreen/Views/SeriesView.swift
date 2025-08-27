@@ -13,8 +13,26 @@ struct SeriesView: View {
     var body: some View {
         NavigationStack {
 
-            List(viewModel.filteredTVShows) { show in
-                Text(show.name)
+            List {
+                if viewModel.isLoading {
+                    ProgressView("Loading series…")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else if viewModel.filteredTVShows.isEmpty {
+                    ContentUnavailableView(
+                        "No TV series",
+                        systemImage: "tv",
+                        description: Text("Try a different search or refresh.")
+                    )
+                    .frame(maxWidth: .infinity, alignment: .center)
+                } else {
+                    ForEach(viewModel.filteredTVShows) { show in
+                        Text(show.name)
+                    }
+                }
             }
             .navigationTitle("Series")
             .searchable(text: $viewModel.searchText)

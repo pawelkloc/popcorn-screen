@@ -23,7 +23,7 @@ class MoviesViewModel: ObservableObject {
         self.service = service
     }
 
-    func loadPopularMovies(page: Int = 1, sort: TMDbService.Endpoint.SortOption? = nil) {
+    func loadPopularMovies(page: Int = 1, sort: TMDbService.SortOption? = nil) {
         isLoading = true
         errorMessage = nil
 

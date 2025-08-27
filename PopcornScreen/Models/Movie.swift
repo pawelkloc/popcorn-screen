@@ -15,6 +15,28 @@ struct Movie: Identifiable, Decodable {
     let genres: [String]
     let averageRating: Double?
 
+    private static let genreMap: [Int: String] = [
+        28: "Action",
+        12: "Adventure",
+        16: "Animation",
+        35: "Comedy",
+        80: "Crime",
+        99: "Documentary",
+        18: "Drama",
+        10751: "Family",
+        14: "Fantasy",
+        36: "History",
+        27: "Horror",
+        10402: "Music",
+        9648: "Mystery",
+        10749: "Romance",
+        878: "Science Fiction",
+        10770: "TV Movie",
+        53: "Thriller",
+        10752: "War",
+        37: "Western"
+    ]
+
     enum CodingKeys: String, CodingKey {
         case id
         case title
@@ -43,8 +65,8 @@ struct Movie: Identifiable, Decodable {
             releaseDate = nil
         }
 
-        _ = try container.decodeIfPresent([Int].self, forKey: .genres)
-        genres = []
+        let genreIds = try container.decodeIfPresent([Int].self, forKey: .genres) ?? []
+        self.genres = genreIds.compactMap { Movie.genreMap[$0] ?? "Unknown" }
 
         averageRating = try container.decodeIfPresent(Double.self, forKey: .averageRating)
     }

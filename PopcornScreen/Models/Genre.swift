@@ -15,4 +15,3 @@ struct Genre: Identifiable, Decodable {
 struct GenreResponse: Decodable {
     let genres: [Genre]
 }
-

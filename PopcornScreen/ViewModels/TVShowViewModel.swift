@@ -23,7 +23,7 @@ class TVShowViewModel: ObservableObject {
         self.service = service
     }
 
-    func loadPopularTV(page: Int = 1, sort: TMDbService.Endpoint.SortOption? = nil) {
+    func loadPopularTV(page: Int = 1, sort: TMDbService.SortOption? = nil) {
         isLoading = true
         errorMessage = nil
 
@@ -54,5 +54,21 @@ class TVShowViewModel: ObservableObject {
         }
 
         filteredTVShows = shows.filter { $0.name.localizedCaseInsensitiveContains(newQuery) }
+    }
+
+    func loadTVShowsByGenres(_ genreIDs: [Int]) {
+        isLoading = true
+        errorMessage = nil
+
+        Task {
+            do {
+                let response = try await service.fetchTVShowsByGenre(genreIDs: genreIDs)
+                self.shows = response.results
+            } catch {
+                print("Error: \(error)")
+                self.errorMessage = "Couldn't load TV shows"
+            }
+            isLoading = false
+        }
     }
 }
