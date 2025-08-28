@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SeriesView: View {
     @StateObject private var viewModel = TVShowViewModel()
-//    @EnvironmentObject var favoriteManager: FavoriteSeriesManager
 
     var body: some View {
         NavigationStack {
@@ -31,19 +30,6 @@ struct SeriesView: View {
                 } else {
                     ForEach(viewModel.filteredTVShows) { show in
                         HStack {Text(show.name)
-                            Spacer()
-//                            Button(action: {
-//                                if favoriteManager.isFavorite(show) {
-//                                    favoriteManager.remove(serial: show)
-//                                } else {
-//                                    favoriteManager.add(serial: show)
-//                                }
-//                            }, label: {
-//                                Image(systemName: favoriteManager.isFavorite(show)
-//                                      ? "heart.fill" : "heart")
-//                                .foregroundColor(.red)
-//                            })
-//                            .buttonStyle(.plain)
                         }
                     }
                 }

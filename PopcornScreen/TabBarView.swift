@@ -1,4 +1,3 @@
-//
 //  ContentView.swift
 //  PopcornScreen
 //
@@ -47,7 +46,6 @@ struct TabBarView: View {
 
         }
         .tint(.primary)
-        .environmentObject(FavoriteMoviesManager())
     }
 }
 

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MoviesView: View {
     @StateObject private var viewModel = MoviesViewModel()
-    @EnvironmentObject var favoriteManager: FavoriteMoviesManager
 
     var body: some View {
         NavigationStack {
@@ -32,18 +31,6 @@ struct MoviesView: View {
                     ForEach(viewModel.filteredMovies) { movie in
                         HStack {
                             Text(movie.title)
-                            Spacer()
-                            Button(action: {
-                                if favoriteManager.isFavorite(movie) {
-                                    favoriteManager.remove(movie: movie)
-                                } else {
-                                    favoriteManager.add(movie: movie)
-                                }
-                            }, label: {
-                                Image(systemName: favoriteManager.isFavorite(movie) ? "heart.fill" : "heart")
-                                    .foregroundColor(.red)
-                            })
-                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -62,5 +49,4 @@ struct MoviesView: View {
 
 #Preview {
     MoviesView()
-        .environmentObject(FavoriteMoviesManager())
 }
