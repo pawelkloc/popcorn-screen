@@ -8,12 +8,20 @@
 import SwiftUI
 
 struct SavedView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(
+        entity: FavoriteMovie.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \FavoriteMovie.title, ascending: true)]
+    ) var favorites: FetchedResults<FavoriteMovie>
+
     var body: some View {
         NavigationStack {
-            List {
+            List(favorites) { movie in
+                Text(movie.title ?? "No Title")
             }
             .navigationTitle("Saved")
         }
+
     }
 }
 
