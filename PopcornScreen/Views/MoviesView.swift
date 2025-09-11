@@ -8,14 +8,10 @@ import SwiftUI
 
 struct MoviesView: View {
     @StateObject private var viewModel = MoviesViewModel()
-    @Environment(\.managedObjectContext) private var viewContext
-    @StateObject private var savedViewModel = SavedViewModel(
-        context: PersistenceController.shared.container.viewContext
-    )
 
     var body: some View {
         NavigationStack {
-            List {
+            ScrollView {
                 if viewModel.isLoading {
                     ProgressView("Loading films…")
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -31,24 +27,13 @@ struct MoviesView: View {
                     )
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else {
-                    ForEach(viewModel.filteredMovies) { movie in
-                        HStack {
-                            Text(movie.title)
-                            Spacer()
-                            Button(action: {
-                                if savedViewModel.isFavorite(Int64(movie.id)) {
-                                    savedViewModel.removeFromFavorites(movieID: Int64(movie.id))
-                                } else {
-                                    savedViewModel.addToFavorites(title: movie.title, id: Int64(movie.id))
-                                }
-                            }, label: {
-                                Image(systemName: savedViewModel.isFavorite(Int64(movie.id))
-                                    ? "star.fill"
-                                    : "star"
-                                )
-                                .foregroundColor(.yellow)
-                            })
-                            .buttonStyle(PlainButtonStyle())
+                    LazyVStack(spacing: 12, pinnedViews: []) {
+                        ForEach(viewModel.filteredMovies) { movie in
+                            NavigationLink {
+//                                MovieDetailsView(movie: movie)
+                            } label: {
+                                MovieBlockView(movie: movie)
+                            }
                         }
                     }
                 }

@@ -9,12 +9,10 @@ import SwiftUI
 
 @main
 struct PopcornScreenApp: App {
-    let persistenceController = PersistenceController.shared
 
     var body: some Scene {
         WindowGroup {
             TabBarView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }

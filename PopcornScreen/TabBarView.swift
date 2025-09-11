@@ -34,7 +34,7 @@ struct TabBarView: View {
 
             SavedView()
                 .tabItem {
-                    Label("Saved", image: "saved")
+                    Label("Saved", image: "favorite")
                 }
                 .tag(Tab.saved)
 

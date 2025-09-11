@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SeriesView: View {
     @StateObject private var viewModel = TVShowViewModel()
-    @Environment(\.managedObjectContext) private var viewContext
 
     var body: some View {
         NavigationStack {
@@ -49,5 +48,4 @@ struct SeriesView: View {
 
 #Preview {
     SeriesView()
-//        .environmentObject(FavoriteSeriesManager())
 }
