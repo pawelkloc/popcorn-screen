@@ -1,14 +1,14 @@
 //
-//  MovieBlockView.swift
+//  SeriesBlockView.swift
 //  PopcornScreen
 //
-//  Created by Paweł Kloc on 08/09/2025.
+//  Created by Paweł Kloc on 17/09/2025.
 //
 
 import SwiftUI
 
-struct MovieBlockView: View {
-    let movie: Movie
+struct SeriesBlockView: View {
+    let show: TVShow
 
     private static let posterSize = CGSize(width: 94, height: 146)
 
@@ -24,13 +24,13 @@ struct MovieBlockView: View {
 
     // Build a full TMDb image URL from a poster path string (e.g. "/abc.jpg")
     private var posterURL: URL? {
-        guard let path = movie.posterPath, !path.isEmpty else { return nil }
+        guard let path = show.posterPath, !path.isEmpty else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
     }
 
     // Convenience to parse the Movie.releaseDate (String "yyyy-MM-dd") into Date?
     private var releaseDateParsed: Date? {
-        guard let release = movie.releaseDate, !release.isEmpty else { return nil }
+        guard let release = show.firstAirDate, !release.isEmpty else { return nil }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
@@ -39,7 +39,7 @@ struct MovieBlockView: View {
 
     // Show genre names if you have them elsewhere; for now, show IDs as comma-separated
     private var genreDisplay: String {
-        let ids = movie.genreIDs ?? []
+        let ids = show.genreIDs ?? []
         return ids.map { String($0) }.joined(separator: ", ")
     }
 
@@ -72,7 +72,7 @@ struct MovieBlockView: View {
             .contentShape(Rectangle())
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(movie.title)
+                Text(show.name)
                     .foregroundColor(.primary)
                     .typography(.header4)
 
@@ -95,7 +95,7 @@ struct MovieBlockView: View {
 
                 HStack(spacing: 6) {
                     Image(.rating)
-                    Text(dotDecimal(movie.voteAverage ?? 0.0))
+                    Text(dotDecimal(show.voteAverage ?? 0.0))
                         .foregroundColor(.secondary)
                         .typography(.body)
                 }

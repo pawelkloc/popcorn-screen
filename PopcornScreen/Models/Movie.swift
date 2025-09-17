@@ -4,33 +4,32 @@
 //
 //  Created by Paweł Kloc on 13/08/2025.
 //
-
 import Foundation
 
-struct Movie: Identifiable, Decodable {
+struct MoviesResponse: Codable {
+    let page: Int
+    let results: [Movie]
+    let totalPages: Int?
+    let totalResults: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case page, results
+        case totalPages = "total_pages"
+        case totalResults = "total_results"
+    }
+}
+
+struct Movie: Codable, Identifiable {
     let id: Int
     let title: String
-    let posterURL: URL?
-    let releaseDate: Date?
-    let genres: [String]
-    let averageRating: Double?
-
-    // Convenience initializer for previews/tests/manual construction
-    init(
-        id: Int,
-        title: String,
-        posterURL: URL?,
-        releaseDate: Date?,
-        genres: [String],
-        averageRating: Double?
-    ) {
-        self.id = id
-        self.title = title
-        self.posterURL = posterURL
-        self.releaseDate = releaseDate
-        self.genres = genres
-        self.averageRating = averageRating
-    }
+    let overview: String
+    let releaseDate: String?
+    let posterPath: String?
+    let backdropPath: String?
+    let voteAverage: Double?
+    let voteCount: Int?
+    let popularity: Double
+    let genreIDs: [Int]?
 
     private static let genreMap: [Int: String] = [
         28: "Action",
@@ -53,48 +52,4 @@ struct Movie: Identifiable, Decodable {
         10752: "War",
         37: "Western"
     ]
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case title
-        case posterURL = "poster_path"
-        case releaseDate = "release_date"
-        case genres = "genre_ids"
-        case averageRating = "vote_average"
-    }
-
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        self.id = try container.decode(Int.self, forKey: .id)
-        self.title = try container.decode(String.self, forKey: .title)
-
-        if let posterPath = try container.decodeIfPresent(String.self, forKey: .posterURL) {
-            self.posterURL = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
-        } else {
-            self.posterURL = nil
-        }
-
-        if let releaseDateString = try container.decodeIfPresent(String.self, forKey: .releaseDate) {
-            releaseDate = Movie.tmdbDateFormatter.date(from: releaseDateString)
-        } else {
-            releaseDate = nil
-        }
-
-        let genreIds = try container.decodeIfPresent([Int].self, forKey: .genres) ?? []
-        self.genres = genreIds.map { Movie.genreMap[$0] ?? "Unknown" }
-
-        averageRating = try container.decodeIfPresent(Double.self, forKey: .averageRating)
-    }
-
-    private static let tmdbDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter
-    }()
-}
-
-struct MovieResponse: Decodable {
-    let results: [Movie]
 }

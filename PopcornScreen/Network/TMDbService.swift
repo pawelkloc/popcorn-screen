@@ -170,8 +170,8 @@ final class TMDbService {
     // MARK: - Specific Fetch Methods
     func fetchPopularMovies(page: Int, sort: TMDbService.SortOption? = nil)
     async throws -> [Movie] {
-        let response: MovieResponse = try await fetch(
-            MovieResponse.self,
+        let response: MoviesResponse = try await fetch(
+            MoviesResponse.self,
             endpoint: .discoverMovies,
             page: page,
             sort: sort
@@ -193,8 +193,8 @@ final class TMDbService {
 
     // MARK: - Search Methods
     func searchMovies(query: String) async throws -> [Movie] {
-        let response: MovieResponse = try await fetch(
-            MovieResponse.self,
+        let response: MoviesResponse = try await fetch(
+            MoviesResponse.self,
             endpoint: .searchMovies,
             page: 1,
             query: query
@@ -256,7 +256,7 @@ final class TMDbService {
         genreIDs: [Int],
         page: Int = 1,
         language: String = "en_US"
-    ) async throws -> MovieResponse {
+    ) async throws -> MoviesResponse {
         let genreString = genreIDs.map { String($0) }.joined(separator: ",")
         let queryItems = [
             URLQueryItem(name: "with_genres", value: genreString),
@@ -265,7 +265,7 @@ final class TMDbService {
         ]
 
         return try await fetch(
-            MovieResponse.self,
+            MoviesResponse.self,
             endpoint: .discoverMovies,
             queryItems: queryItems
         )

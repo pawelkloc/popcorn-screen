@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-class MoviesViewModel: ObservableObject {
+final class MoviesViewModel: ObservableObject {
     @Published var movies: [Movie] = []
     @Published var filteredMovies: [Movie] = []
     @Published var searchText: String = "" {
@@ -23,7 +23,7 @@ class MoviesViewModel: ObservableObject {
         self.service = service
     }
 
-    func loadPopularMovies(page: Int = 1, sort: TMDbService.SortOption? = nil) {
+    func loadPopularMovies(page: Int = 100, sort: TMDbService.SortOption? = nil) {
         isLoading = true
         errorMessage = nil
 

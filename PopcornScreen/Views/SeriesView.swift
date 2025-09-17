@@ -10,11 +10,23 @@ import SwiftUI
 struct SeriesView: View {
     @StateObject private var viewModel = TVShowViewModel()
 
+    private static let posterSize = CGSize(width: 94, height: 146)
+
+    private func dotDecimal(_ value: Double) -> String {
+        // en_US_POSIX guarantee "dot" as separator in float numbers
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.minimumFractionDigits = 1
+        formatter.maximumFractionDigits = 1
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.1f", value)
+    }
+
     var body: some View {
         NavigationStack {
-            List {
+            ScrollView {
                 if viewModel.isLoading {
-                    ProgressView("Loading series…")
+                    ProgressView("Loading TV Series…")
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else if let error = viewModel.errorMessage {
                     Text(error)
@@ -22,20 +34,28 @@ struct SeriesView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else if viewModel.filteredTVShows.isEmpty {
                     ContentUnavailableView(
-                        "No TV series",
-                        systemImage: "tv",
+                        "No series found.",
+                        systemImage: "film",
                         description: Text("Try a different search or refresh.")
                     )
                     .frame(maxWidth: .infinity, alignment: .center)
                 } else {
-                    ForEach(viewModel.filteredTVShows) { show in
-                        HStack {Text(show.name)
+                    LazyVStack(spacing: 12, pinnedViews: []) {
+                        ForEach(viewModel.filteredTVShows) { show in
+                            NavigationLink {
+                                // TODO: Push to a SeriesDetailsView(movie:) when available
+                                SeriesBlockView(show: show)
+                                    .navigationTitle(show.name)
+                            } label: {
+                                SeriesBlockView(show: show)
+                            }
                         }
                     }
+                    .padding(.vertical, 8)
                 }
             }
             .navigationTitle("Series")
-            .searchable(text: $viewModel.searchText)
+            .searchable(text: $viewModel.searchText, prompt: "Search for series...")
             .onSubmit(of: .search) {
                 viewModel.searchTV(query: viewModel.searchText)
             }

@@ -9,6 +9,18 @@ import SwiftUI
 struct MoviesView: View {
     @StateObject private var viewModel = MoviesViewModel()
 
+    private static let posterSize = CGSize(width: 94, height: 146)
+
+    private func dotDecimal(_ value: Double) -> String {
+        // en_US_POSIX guarantee "dot" as separator in float numbers
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.minimumFractionDigits = 1
+        formatter.maximumFractionDigits = 1
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.1f", value)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -30,16 +42,19 @@ struct MoviesView: View {
                     LazyVStack(spacing: 12, pinnedViews: []) {
                         ForEach(viewModel.filteredMovies) { movie in
                             NavigationLink {
-//                                MovieDetailsView(movie: movie)
+                                // TODO: Push to a MovieDetailsView(movie:) when available
+                                MovieBlockView(movie: movie)
+                                    .navigationTitle(movie.title)
                             } label: {
                                 MovieBlockView(movie: movie)
                             }
                         }
                     }
+                    .padding(.vertical, 8)
                 }
             }
             .navigationTitle("Movies")
-            .searchable(text: $viewModel.searchText)
+            .searchable(text: $viewModel.searchText, prompt: "Search for movies...")
             .onSubmit(of: .search) {
                 viewModel.searchMovies(query: viewModel.searchText)
             }
