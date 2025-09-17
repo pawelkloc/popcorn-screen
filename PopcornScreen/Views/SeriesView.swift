@@ -55,6 +55,53 @@ struct SeriesView: View {
                 }
             }
             .navigationTitle("Series")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Section("Sort by") {
+                            Button {
+                                viewModel.applySort(.alphabeticalAscending)
+                            } label: {
+                                Label("Alphabetical order", image: "ascending")
+                            }
+                            Button {
+                                viewModel.applySort(.alphabeticalDescending)
+                            } label: {
+                                Label("Alphabetical order", image: "descending")
+                            }
+                            Button {
+                                viewModel.applySort(.releaseDateAscending)
+                            } label: {
+                                Label("Release date", image: "ascending")
+                            }
+                            Button {
+                                viewModel.applySort(.releaseDateDescending)
+                            } label: {
+                                Label("Release date", image: "descending")
+                            }
+                            Button {
+                                viewModel.applySort(.ratingAscending)
+                            } label: {
+                                Label("Rating", image: "ascending")
+                            }
+                            Button {
+                                viewModel.applySort(.ratingDescending)
+                            } label: {
+                                Label("Rating", image: "descending")
+                            }
+                        }
+                        if viewModel.currentSort != nil {
+                            Section {
+                                Button(role: .destructive) { viewModel.applySort(nil) } label: {
+                                    Label("Clear sort", systemImage: "xmark.circle")
+                                }
+                            }
+                        }
+                    } label: {
+                        Label("Sort", image: "sort-default")
+                    }
+                }
+            }
             .searchable(text: $viewModel.searchText, prompt: "Search for series...")
             .onSubmit(of: .search) {
                 viewModel.searchTV(query: viewModel.searchText)

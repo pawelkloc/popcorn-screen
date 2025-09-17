@@ -12,38 +12,38 @@ enum Tab: Hashable {
 
 struct TabBarView: View {
     @State private var selection: Tab = .movies
+
     var body: some View {
         TabView(selection: $selection) {
             MoviesView()
                 .tabItem {
-                    Label("Movies", image: "movies")
+                    Label("Movies", image: selection == .movies ? "movies-pressed" : "movies")
                 }
                 .tag(Tab.movies)
 
             SeriesView()
                 .tabItem {
-                    Label("Series", image: "series")
+                    Label("Series", image: selection == .series ? "series-pressed" : "series")
                 }
                 .tag(Tab.series)
 
             SearchView()
                 .tabItem {
-                    Label("Search", image: "search")
+                    Label("Search", image: selection == .search ? "search-pressed" : "search")
                 }
                 .tag(Tab.search)
 
             SavedView()
                 .tabItem {
-                    Label("Saved", image: "favorite")
+                    Label("Saved", image: selection == .saved ? "favorite-pressed" : "favorite")
                 }
                 .tag(Tab.saved)
 
             SettingsView()
                 .tabItem {
-                    Label("Settings", image: "settings")
+                    Label("Settings", image: selection == .settings ? "settings-pressed" : "settings")
                 }
                 .tag(Tab.settings)
-
         }
         .tint(.primary)
     }
