@@ -26,7 +26,6 @@ private struct Typography {
             return .system(size: 14, weight: .medium, design: .default)
         case .caption:
             return .system(size: 12, weight: .medium, design: .default)
-            
         }
     }
 }
