@@ -8,19 +8,19 @@
 import SwiftUI
 
 enum AppTextStyles {
-    case h1, h2, h3, h4, body, caption
+    case header1, header2, header3, header4, body, caption
 }
 
 private struct Typography {
     static func font(for style: AppTextStyles) -> Font {
         switch style {
-        case .h1:
+        case .header1:
             return .system(size: 28, weight: .semibold, design: .default)
-        case .h2:
+        case .header2:
             return .system(size: 24, weight: .semibold, design: .default)
-        case .h3:
+        case .header3:
             return .system(size: 18, weight: .medium, design: .default)
-        case .h4:
+        case .header4:
             return .system(size: 16, weight: .medium, design: .default)
         case .body:
             return .system(size: 14, weight: .medium, design: .default)
