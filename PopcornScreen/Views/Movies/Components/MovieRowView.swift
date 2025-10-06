@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MovieBlockView: View {
+struct MovieRowView: View {
     let movie: Movie
 
     private static let posterSize = CGSize(width: 94, height: 146)
@@ -22,7 +22,6 @@ struct MovieBlockView: View {
         return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.1f", value)
     }
 
-    // Build a full TMDb image URL from a poster path string (e.g. "/abc.jpg")
     private var posterURL: URL? {
         guard let path = movie.posterPath, !path.isEmpty else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
@@ -109,7 +108,7 @@ struct MovieBlockView: View {
 
 #Preview {
     // Preview using the current Movie model shape
-    MovieBlockView(
+    MovieRowView(
         movie: Movie(
             id: 1,
             title: "Sample Movie Title",

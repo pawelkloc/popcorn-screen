@@ -109,7 +109,7 @@ struct SeriesBlockView: View {
 
 #Preview {
     // Preview using the current Movie model shape
-    MovieBlockView(
+    MovieRowView(
         movie: Movie(
             id: 1,
             title: "Sample Movie Title",

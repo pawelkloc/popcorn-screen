@@ -44,7 +44,7 @@ final class MoviesViewModel: ObservableObject {
         filterMovies()
     }
 
-    func loadPopularMovies(page: Int = 100, sort: TMDbService.SortOption? = nil) {
+    func loadPopularMovies(page: Int = 1, sort: TMDbService.SortOption? = nil) {
         isLoading = true
         errorMessage = nil
 

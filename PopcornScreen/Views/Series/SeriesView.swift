@@ -1,4 +1,5 @@
-//  MoviesView.swift
+//
+//  SeriesView.swift
 //  PopcornScreen
 //
 //  Created by Paweł Kloc on 13/08/2025.
@@ -6,50 +7,54 @@
 
 import SwiftUI
 
-struct MoviesView: View {
-    @StateObject private var viewModel = MoviesViewModel()
-    @State private var selectedGenres: Set<String> = []
+struct SeriesView: View {
+    @StateObject private var viewModel = TVShowViewModel()
 
     private static let posterSize = CGSize(width: 94, height: 146)
 
     private func dotDecimal(_ value: Double) -> String {
-        // Use C-style formatting which guarantees a dot as the decimal separator with the default C locale
-        return String(format: "%.1f", value)
+        // en_US_POSIX guarantee "dot" as separator in float numbers
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.minimumFractionDigits = 1
+        formatter.maximumFractionDigits = 1
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.1f", value)
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 if viewModel.isLoading {
-                    ProgressView("Loading films…")
+                    ProgressView("Loading TV Series…")
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else if let error = viewModel.errorMessage {
                     Text(error)
                         .foregroundColor(.red)
                         .frame(maxWidth: .infinity, alignment: .center)
-                } else if viewModel.filteredMovies.isEmpty {
+                } else if viewModel.filteredTVShows.isEmpty {
                     ContentUnavailableView(
-                        "No movies",
+                        "No series found.",
                         systemImage: "film",
                         description: Text("Try a different search or refresh.")
                     )
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 } else {
                     LazyVStack(spacing: 12, pinnedViews: []) {
-                        ForEach(viewModel.filteredMovies) { movie in
+                        ForEach(viewModel.filteredTVShows) { show in
                             NavigationLink {
-                                // TODO: Push to a MovieDetailsView(movie:) when available
-                                MovieBlockView(movie: movie)
-                                    .navigationTitle(movie.title)
+                                // TODO: Push to a SeriesDetailsView(movie:) when available
+                                SeriesBlockView(show: show)
+                                    .navigationTitle(show.name)
                             } label: {
-                                MovieBlockView(movie: movie)
+                                SeriesBlockView(show: show)
                             }
                         }
                     }
                     .padding(.vertical, 8)
                 }
             }
-            .navigationTitle("Movies")
+            .navigationTitle("Series")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -72,7 +77,10 @@ struct MoviesView: View {
                             Button {
                                 viewModel.applySort(.releaseDateDescending)
                             } label: {
-                                Label("Release date", image: "descending")
+                                HStack {
+                                    Text("Release date")
+                                    Image("descending")
+                                }
                             }
                             Button {
                                 viewModel.applySort(.ratingAscending)
@@ -97,17 +105,17 @@ struct MoviesView: View {
                     }
                 }
             }
-            .searchable(text: $viewModel.searchText, prompt: "Search for movies...")
+            .searchable(text: $viewModel.searchText, prompt: "Search for series...")
             .onSubmit(of: .search) {
-                viewModel.searchMovies(query: viewModel.searchText)
+                viewModel.searchTV(query: viewModel.searchText)
             }
             .task {
-                viewModel.loadPopularMovies()
+                viewModel.loadPopularTV()
             }
         }
     }
 }
 
 #Preview {
-    MoviesView()
+    SeriesView()
 }
