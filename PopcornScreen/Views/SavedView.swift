@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct SavedView: View {
+
     var body: some View {
         NavigationStack {
-            Text("Saved")
-                .navigationTitle("Saved")
         }
+
     }
 }
 

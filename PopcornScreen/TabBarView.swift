@@ -1,4 +1,3 @@
-//
 //  ContentView.swift
 //  PopcornScreen
 //
@@ -13,7 +12,6 @@ enum Tab: Hashable {
 
 struct TabBarView: View {
     @State private var selection: Tab = .movies
-    
     var body: some View {
         TabView(selection: $selection) {
             MoviesView()
@@ -21,22 +19,22 @@ struct TabBarView: View {
                     Label("Movies", image: "movies")
                 }
                 .tag(Tab.movies)
-            
+
             SeriesView()
                 .tabItem {
                     Label("Series", image: "series")
                 }
                 .tag(Tab.series)
-            
+
             SearchView()
                 .tabItem {
                     Label("Search", image: "search")
                 }
                 .tag(Tab.search)
-            
+
             SavedView()
                 .tabItem {
-                    Label("Saved", image: "saved")
+                    Label("Saved", image: "favorite")
                 }
                 .tag(Tab.saved)
 

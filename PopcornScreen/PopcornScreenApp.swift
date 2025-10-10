@@ -9,6 +9,7 @@ import SwiftUI
 
 @main
 struct PopcornScreenApp: App {
+
     var body: some Scene {
         WindowGroup {
             TabBarView()
