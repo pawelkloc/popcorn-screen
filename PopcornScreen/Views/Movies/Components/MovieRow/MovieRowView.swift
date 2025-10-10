@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MovieRowView: View {
+    @ObservedObject var viewModel: MoviesViewModel
     let movie: Movie
 
     private static let posterSize = CGSize(width: 94, height: 146)
@@ -40,6 +41,11 @@ struct MovieRowView: View {
     private var genreDisplay: String {
         let ids = movie.genreIDs ?? []
         return ids.map { String($0) }.joined(separator: ", ")
+    }
+
+    private var genresText: String {
+        let names = viewModel.genreNames(for: movie)
+        return names.isEmpty ? genreDisplay : names
     }
 
     var body: some View {
@@ -88,8 +94,8 @@ struct MovieRowView: View {
 
                 Spacer(minLength: 0)
 
-                Text(genreDisplay)
-                    .foregroundColor(.secondary)
+                Text(genresText)
+                    .foregroundColor(.lightGray)
                     .typography(.body)
 
                 HStack(spacing: 6) {
@@ -109,7 +115,7 @@ struct MovieRowView: View {
 #Preview {
     // Preview using the current Movie model shape
     MovieRowView(
-        movie: Movie(
+        viewModel: MoviesViewModel(), movie: Movie(
             id: 1,
             title: "Sample Movie Title",
             overview: "Overview",

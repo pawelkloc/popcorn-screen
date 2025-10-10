@@ -56,14 +56,13 @@ final class TMDbService {
             }
         }
 
-        /// Default query items for each endpoint (page and query are added separately when provided).
         var defaultQueryItems: [URLQueryItem] {
             switch self {
             case .discoverMovies:
                 return [
                     URLQueryItem(name: "include_adult", value: "false"),
                     URLQueryItem(name: "include_video", value: "false"),
-                    URLQueryItem(name: "language", value: "en_US"),
+                    URLQueryItem(name: "language", value: "en-US"),
                     URLQueryItem(name: "sort_by", value: "popularity.desc")
                 ]
             case .discoverTV:
@@ -78,7 +77,7 @@ final class TMDbService {
                     URLQueryItem(name: "language", value: "en_US")
                 ]
             case .movieGenres:
-                return [URLQueryItem(name: "language", value: "en_US")]
+                return [URLQueryItem(name: "language", value: "en-US")]
 
             case .tvGenres:
                 return [URLQueryItem(name: "language", value: "en_US")]
@@ -238,7 +237,7 @@ final class TMDbService {
             GenreResponse.self,
             endpoint: .movieGenres
         )
-        print("Fetched \(response.genres.count) genres from TMDb")
+//        print("Fetched \(response.genres.count) genres from TMDb")
         return response.genres
     }
 

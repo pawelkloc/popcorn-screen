@@ -11,18 +11,38 @@ import Foundation
 final class MoviesViewModel: ObservableObject {
     @Published var movies: [Movie] = []
     @Published var filteredMovies: [Movie] = []
-    @Published var searchText: String = "" {
-        didSet { filterMovies() }
-    }
+    @Published var searchText: String = "" { didSet { filterMovies() } }
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var currentSort: TMDbService.SortOption?
+    @Published var currentSortOrder: [TMDbService.SortOption] = []
     @Published var selectedGenreIDs: Set<Int> = []
+    @Published var genres: [Genre] = []
+    private var genresCacheByID: [Int: Genre] = [:]
 
     private let service: TMDbService
 
     init(service: TMDbService = .shared) {
         self.service = service
+    }
+
+    func loadGenres() async {
+        do {
+            let fetched = try await service.fetchMovieGenres()
+            self.genres = fetched
+            self.genresCacheByID = Dictionary(uniqueKeysWithValues: fetched.map { ($0.id, $0) })
+        } catch {
+            print("[MoviesViewModel] loadGenres error: \(error)")
+        }
+    }
+
+    func genres(for movie: Movie) -> [Genre] {
+        let ids = movie.genreIDs ?? []
+        return ids.compactMap { genresCacheByID[$0] }
+    }
+
+    func genreNames(for movie: Movie) -> String {
+        genres(for: movie).map(\.name).joined(separator: ", ")
     }
 
     func setSelectedGenres(_ ids: Set<Int>) {
@@ -52,7 +72,7 @@ final class MoviesViewModel: ObservableObject {
             do {
                 let fetchedMovies = try await service.fetchPopularMovies(page: page, sort: sort)
                 self.movies = fetchedMovies
-                self.filteredMovies = fetchedMovies
+                self.filterMovies()
                 self.applySort(sort)
             } catch {
                 print("Error fetching movies: \(error)")
@@ -78,40 +98,35 @@ final class MoviesViewModel: ObservableObject {
         if !selectedGenreIDs.isEmpty {
             base = base.filter { movie in
                 guard let ids = movie.genreIDs else { return false }
-                return !selectedGenreIDs.isDisjoint(with: Set(ids))
+                let movieSet = Set(ids)
+                return !movieSet.isDisjoint(with: selectedGenreIDs)
             }
         }
+
+        print("[filterMovies] movies:", movies.count,
+              "selectedGenres:", selectedGenreIDs,
+              "query:", "\"\(searchText)\"")
 
         // Apply text filter
         guard !newQuery.isEmpty else {
             filteredMovies = base
+            print("[filterMovies] filteredMovies:", filteredMovies.count)
             return
         }
 
         filteredMovies = base.filter { $0.title.localizedCaseInsensitiveContains(newQuery) }
     }
 
-    func loadMoviesByGenres(_ genreIDs: [Int]) {
-        isLoading = true
-        errorMessage = nil
-
-        Task {
-            do {
-                let response = try await service.fetchMoviesByGenres(genreIDs: genreIDs)
-                self.movies = response.results
-                self.filterMovies()
-            } catch {
-                print("Error: \(error)")
-                self.errorMessage = "Couldn't load movies"
-            }
-            isLoading = false
-        }
-    }
-
     func applySort(_ option: TMDbService.SortOption?) {
         currentSort = option
+        currentSortOrder = option.map { [$0] } ?? []
         sortMovies(using: option)
-        filterMovies()
+    }
+
+    func applySortOrder(_ options: [TMDbService.SortOption]) {
+        currentSortOrder = options
+        currentSort = options.first
+        sortMovies(using: options)
     }
 
     private func sortMovies(using option: TMDbService.SortOption?) {
@@ -134,7 +149,36 @@ final class MoviesViewModel: ObservableObject {
         }
 
         self.movies = sorted
+        filterMovies()
         self.filteredMovies = sortFilteredKeepingQuery(current: filteredMovies, base: sorted)
+    }
+
+    private func sortMovies(using options: [TMDbService.SortOption]) {
+        guard !options.isEmpty else { return }
+        self.movies = movies.sorted { leftMovie, rightMovie in
+            for opt in options {
+                let cmp: ComparisonResult
+                switch opt {
+                case .alphabeticalAscending, .alphabeticalDescending:
+                    cmp = leftMovie.title.localizedCaseInsensitiveCompare(rightMovie.title)
+                case .releaseDateAscending, .releaseDateDescending:
+                    cmp = (leftMovie.releaseDate ?? "").localizedStandardCompare(rightMovie.releaseDate ?? "")
+                case .ratingAscending, .ratingDescending:
+                    let lhs = leftMovie.voteAverage ?? 0
+                    let rhs = rightMovie.voteAverage ?? 0
+                    if lhs != rhs {
+                        return opt == .ratingAscending ? lhs < rhs : lhs > rhs
+                    } else {
+                        continue
+                    }
+                }
+                if cmp != .orderedSame {
+                    return (opt == .alphabeticalAscending || opt == .releaseDateAscending) ? (cmp == .orderedAscending) : (cmp == .orderedDescending)
+                }
+            }
+            return false
+        }
+        filterMovies()
     }
 
     private func sortFilteredKeepingQuery(current: [Movie], base: [Movie]) -> [Movie] {
@@ -143,4 +187,26 @@ final class MoviesViewModel: ObservableObject {
         if newQuery.isEmpty { return base }
         return base.filter { $0.title.localizedCaseInsensitiveContains(newQuery) }
     }
+
+    // MARK: - Toggle helpers (for convenience)
+    enum Category { case alphabetical, releaseDate, rating }
+
+    func toggle(for category: Category) {
+        switch category {
+        case .alphabetical:
+            let next: TMDbService.SortOption = (currentSort == .alphabeticalAscending) ? .alphabeticalDescending : .alphabeticalAscending
+            applySort(next)
+        case .releaseDate:
+            let next: TMDbService.SortOption = (currentSort == .releaseDateAscending) ? .releaseDateDescending : .releaseDateAscending
+            applySort(next)
+        case .rating:
+            let next: TMDbService.SortOption = (currentSort == .ratingAscending) ? .ratingDescending : .ratingAscending
+            applySort(next)
+        }
+    }
+
+    func toggleAlphabetical() { toggle(for: .alphabetical) }
+    func toggleReleaseDate() { toggle(for: .releaseDate) }
+    func toggleRating() { toggle(for: .rating) }
 }
+

@@ -1,18 +1,18 @@
 //
-//  GenresView.swift
+//  MovieDetailsView.swift
 //  PopcornScreen
 //
-//  Created by Paweł Kloc on 06/10/2025.
+//  Created by Paweł Kloc on 09/10/2025.
 //
 
 import SwiftUI
 
-struct GenresView: View {
+struct MovieDetailsView: View {
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
     }
 }
 
 #Preview {
-    GenresView()
+    MovieDetailsView()
 }
