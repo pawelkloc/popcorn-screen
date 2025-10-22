@@ -9,22 +9,42 @@ import SwiftUI
 struct MoviesView: View {
     @StateObject var viewModel = MoviesViewModel()
 
-    private static let posterSize = CGSize(width: 94, height: 146)
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                SearchFieldView(searchText: $viewModel.searchText)
+                SearchFieldView(
+                    searchText: $viewModel.searchText,
+                    placeholder: "Search movies",
+                    onSubmit: {
+                        viewModel.searchMovies(query: viewModel.searchText)
+                    },
+                    onTextChange: { text in
+                        if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            viewModel.searchMovies(query: "")
+                        }
+                    }
+                )
+                .padding(.vertical, 16)
 
                 HStack {
                     Text("Movies")
                         .typography(.header1)
-                        .padding(16)
 
                     Spacer()
 
-                    SortView(viewModel: viewModel)
-                        .padding(16)
+                    SortView(
+                        currentSort: $viewModel.currentSort,
+                        onApply: {
+                            viewModel.applySort(viewModel.currentSort)
+                        },
+                        onReset: {
+                            viewModel.applySort(nil)
+                        },
+                        onReload: {
+                            // To powoduje ponowne pobranie oryginalnej listy po Reset
+                            viewModel.loadPopularMovies()
+                        }
+                    )
                 }
 
                 GenresView(viewModel: viewModel)
@@ -48,17 +68,28 @@ struct MoviesView: View {
                         VStack(spacing: 12) {
                             ForEach(viewModel.filteredMovies) { movie in
                                 NavigationLink {
-                                    MovieDetailsView()
+                                    MediaDetailsView(item: movie)
                                         .navigationTitle(movie.title)
                                 } label: {
-                                    MovieRowView(viewModel: viewModel, movie: movie)
+                                    MediaRowView(
+                                        title: movie.title,
+                                        subtitle: movie.releaseYear.isEmpty ? nil : movie.releaseYear,
+                                        rating: movie.voteAverage,
+                                        posterURL: movie.posterURL,
+                                        genres: viewModel.genres(for: movie).map(\.name)
+                                    )
                                 }
                             }
                         }
                         .padding(.vertical, 8)
                     }
                 }
+                .refreshable {
+                    await viewModel.loadGenres()
+                    viewModel.loadPopularMovies()
+                }
             }
+            .padding(12)
         }
         .task {
             await viewModel.loadGenres()

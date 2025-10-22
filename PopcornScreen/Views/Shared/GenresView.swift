@@ -7,13 +7,22 @@
 
 import SwiftUI
 
-struct GenresView: View {
-    @ObservedObject var viewModel: MoviesViewModel
+protocol GenresViewModeling: ObservableObject {
+    var genres: [Genre] { get }
+    var selectedGenreIDs: Set<Int> { get }
+    func clearGenres()
+    func toggleGenre(_ id: Int)
+    func loadGenres() async
+}
+
+struct GenresView<VM: GenresViewModeling>: View {
+    @ObservedObject var viewModel: VM
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 let isAllSelected = viewModel.selectedGenreIDs.isEmpty
+
                 Button {
                     viewModel.clearGenres()
                 } label: {
@@ -32,10 +41,11 @@ struct GenresView: View {
                         Capsule().stroke(isAllSelected ? .yellow : .primary, lineWidth: 1)
                     )
                 }
-                .buttonStyle(.plain)
+
                 ForEach(viewModel.genres) { genre in
                     chip(for: genre)
                 }
+
                 if !viewModel.selectedGenreIDs.isEmpty {
                     Button {
                         viewModel.clearGenres()
@@ -47,14 +57,11 @@ struct GenresView: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                     }
-                    .buttonStyle(.bordered)
                 }
             }
-            .padding(.horizontal)
             .padding(.vertical, 8)
         }
         .task { await viewModel.loadGenres() }
-
     }
 
     private func chip(for genre: Genre) -> some View {
@@ -84,6 +91,8 @@ struct GenresView: View {
         .buttonStyle(.plain)
     }
 }
+
+extension MoviesViewModel: GenresViewModeling {}
 
 #Preview {
     NavigationStack {

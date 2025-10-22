@@ -1,17 +1,17 @@
 //
-//  MoviesViewModel.swift
+//  TVShowsViewModel.swift
 //  PopcornScreen
 //
-//  Created by Paweł Kloc on 20/08/2025.
+//  Created by Paweł Kloc on 21/08/2025.
 //
 
 import Foundation
 
 @MainActor
-final class MoviesViewModel: ObservableObject {
-    @Published var movies: [Movie] = []
-    @Published var filteredMovies: [Movie] = []
-    @Published var searchText: String = "" { didSet { filterMovies() } }
+final class SeriesViewModel: ObservableObject {
+    @Published var series: [TVShow] = []
+    @Published var filteredSeries: [TVShow] = []
+    @Published var searchText: String = "" { didSet { filterSeries() } }
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var currentSort: TMDBSortOption?
@@ -20,10 +20,10 @@ final class MoviesViewModel: ObservableObject {
     @Published var genres: [Genre] = []
     private var genresCacheByID: [Int: Genre] = [:]
 
-    private let service: MovieService
+    private let service: TVService
 
     // Designated initializer for dependency injection
-    init(service: MovieService) {
+    init(service: TVService) {
         self.service = service
     }
 
@@ -31,28 +31,29 @@ final class MoviesViewModel: ObservableObject {
         self.init(service: TMDbService())
     }
 
+    // MARK: - Genres
     func loadGenres() async {
         do {
-            let fetched = try await service.movieGenres(language: "en-US")
+            let fetched = try await service.tvGenres(language: "en-US")
             self.genres = fetched
             self.genresCacheByID = Dictionary(uniqueKeysWithValues: fetched.map { ($0.id, $0) })
         } catch {
-            print("[MoviesViewModel] loadGenres error: \(error)")
+            print("[SeriesViewModel] loadGenres error: \(error)")
         }
     }
 
-    func genres(for movie: Movie) -> [Genre] {
-        let ids = movie.genreIds ?? []
+    func genres(for show: TVShow) -> [Genre] {
+        let ids = show.genreIds ?? []
         return ids.compactMap { genresCacheByID[$0] }
     }
 
-    func genreNames(for movie: Movie) -> String {
-        genres(for: movie).map(\.name).joined(separator: ", ")
+    func genreNames(for show: TVShow) -> String {
+        genres(for: show).map(\.name).joined(separator: ", ")
     }
 
     func setSelectedGenres(_ ids: Set<Int>) {
         selectedGenreIDs = ids
-        filterMovies()
+        filterSeries()
     }
 
     func toggleGenre(_ id: Int) {
@@ -61,117 +62,113 @@ final class MoviesViewModel: ObservableObject {
         } else {
             selectedGenreIDs.insert(id)
         }
-        filterMovies()
+        filterSeries()
     }
 
     func clearGenres() {
         selectedGenreIDs.removeAll()
-        filterMovies()
+        filterSeries()
     }
 
-    func loadPopularMovies(page: Int = 1, sort: TMDBSortOption? = nil) {
+    // MARK: - Data loading
+    func loadPopularSeries(page: Int = 1, sort: TMDBSortOption? = nil) {
         isLoading = true
         errorMessage = nil
 
         Task {
             do {
-                let fetchedMovies = try await service.popularMovies(page: page, sort: sort)
+                let fetched = try await service.popularShows(page: page, sort: sort)
                 await MainActor.run {
-                    self.movies = fetchedMovies
-                    self.filterMovies()
+                    self.series = fetched
                     self.applySort(sort)
+                    self.filterSeries()
                     self.isLoading = false
                 }
             } catch {
-                print("\(#function) Error fetching movies: \(error)")
+                print("\(#function) Error fetching series: \(error)")
                 await MainActor.run {
-                    self.errorMessage = "Failed to load movies"
+                    self.errorMessage = "Failed to load series"
                     self.isLoading = false
                 }
             }
         }
     }
 
-    func searchMovies(query: String, page: Int = 1) {
+    func searchSeries(query: String, page: Int = 1) {
         isLoading = true
         errorMessage = nil
         self.searchText = query
         Task {
             do {
                 if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    let fetched = try await service.popularMovies(page: 1, sort: currentSort)
-                    await MainActor.run { self.movies = fetched }
+                    let fetched = try await service.popularShows(page: 1, sort: currentSort)
+                    await MainActor.run { self.series = fetched }
                 } else {
-                    let results = try await service.searchMovies(query, page: page)
-                    await MainActor.run { self.movies = results }
+                    let results = try await service.searchShows(query, page: page)
+                    await MainActor.run { self.series = results }
                 }
                 await MainActor.run {
                     self.applySort(self.currentSort)
-                    self.filterMovies()
+                    self.filterSeries()
                     self.isLoading = false
                 }
             } catch {
-                print("\(#function) Error searching movies: \(error)")
+                print("\(#function) Error searching series: \(error)")
                 await MainActor.run {
-                    self.errorMessage = "Failed to search movies"
+                    self.errorMessage = "Failed to search series"
                     self.isLoading = false
                 }
             }
         }
     }
 
-    private func filterMovies() {
+    // MARK: - Filtering & sorting
+    private func filterSeries() {
         let newQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        var base = series
 
-        // Start from the current base list (already sorted if applySort was used)
-        var base = movies
-
-        // Apply genre filter if any genres are selected
         if !selectedGenreIDs.isEmpty {
-            base = base.filter { movie in
-                guard let ids = movie.genreIds else { return false }
-                let movieSet = Set(ids)
-                return !movieSet.isDisjoint(with: selectedGenreIDs)
+            base = base.filter { show in
+                guard let ids = show.genreIds else { return false }
+                let showSet = Set(ids)
+                return !showSet.isDisjoint(with: selectedGenreIDs)
             }
         }
 
-        print("[filterMovies] movies:", movies.count,
+        print("[filterSeries] series:", series.count,
               "selectedGenres:", selectedGenreIDs,
               "query:", "\"\(searchText)\"")
 
-        // Apply text filter
         guard !newQuery.isEmpty else {
-            filteredMovies = base
-            print("[filterMovies] filteredMovies:", filteredMovies.count)
+            filteredSeries = base
+            print("[filterSeries] filteredSeries:", filteredSeries.count)
             return
         }
 
-        filteredMovies = base.filter { $0.title.localizedCaseInsensitiveContains(newQuery) }
+        filteredSeries = base.filter { $0.name.localizedCaseInsensitiveContains(newQuery) }
     }
 
     func applySort(_ option: TMDBSortOption?) {
         currentSort = option
         currentSortOrder = option.map { [$0] } ?? []
-        sortMovies(using: option)
+        sortSeries(using: option)
     }
 
     func applySortOrder(_ options: [TMDBSortOption]) {
         currentSortOrder = options
         currentSort = options.first
-        sortMovies(using: options)
+        sortSeries(using: options)
     }
 
-    // MARK: - Sorting
-
-    private func comparisonResult(for option: TMDBSortOption, lhs: Movie, rhs: Movie) -> ComparisonResult {
+    private func comparisonResult(for option: TMDBSortOption, lhs: TVShow, rhs: TVShow) -> ComparisonResult {
         switch option {
         case .alphabeticalAscending, .alphabeticalDescending:
-            let res = lhs.title.localizedCaseInsensitiveCompare(rhs.title)
+            let res = lhs.name.localizedCaseInsensitiveCompare(rhs.name)
             return option == .alphabeticalAscending ? res : res.inverted
 
         case .releaseDateAscending, .releaseDateDescending:
-            let left = lhs.releaseDate ?? ""
-            let right = rhs.releaseDate ?? ""
+            let left = lhs.firstAirDate ?? ""
+            let right = rhs.firstAirDate ?? ""
             let res: ComparisonResult = (left == right) ? .orderedSame : (left < right ? .orderedAscending : .orderedDescending)
             return option == .releaseDateAscending ? res : res.inverted
 
@@ -183,21 +180,21 @@ final class MoviesViewModel: ObservableObject {
         }
     }
 
-    private func sortMovies(using option: TMDBSortOption?) {
+    private func sortSeries(using option: TMDBSortOption?) {
         guard let option = option else { return }
-        sortMovies(using: [option])
+        sortSeries(using: [option])
     }
 
-    private func sortMovies(using options: [TMDBSortOption]) {
+    private func sortSeries(using options: [TMDBSortOption]) {
         guard !options.isEmpty else { return }
-        movies.sort { left, right in
+        series.sort { left, right in
             for opt in options {
                 let cmp = comparisonResult(for: opt, lhs: left, rhs: right)
                 if cmp != .orderedSame { return cmp == .orderedAscending }
             }
             return false
         }
-        filterMovies()
+        filterSeries()
     }
 
     // MARK: - Toggle helpers (for convenience)
@@ -231,3 +228,7 @@ private extension ComparisonResult {
         }
     }
 }
+
+// Conform SeriesViewModel to the GenresViewModeling protocol used by GenresView
+@MainActor
+extension SeriesViewModel: @MainActor GenresViewModeling {}
