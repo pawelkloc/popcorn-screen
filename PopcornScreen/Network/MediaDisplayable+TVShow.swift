@@ -13,6 +13,6 @@ extension TVShow: MediaDisplayable {
     var releaseDateText: String? { firstAirYear }
     var runtimeText: String? { nil }
     var overviewText: String { overview }
-    var language: String? { languageDisplayName }
+    var language: String? { languageDisplayName.isEmpty ? nil : languageDisplayName }
     var productionCompaniesText: String? { nil }
 }

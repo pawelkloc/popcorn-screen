@@ -36,13 +36,11 @@ struct Movie: Decodable, Identifiable {
 }
 
 extension Movie {
-    // Returns the 4-digit year extracted from TMDB's releaseDate ("yyyy-MM-dd"), or an empty string if unavailable.
     var releaseYear: String {
         guard let releaseDate, releaseDate.count >= 4 else { return "" }
         return String(releaseDate.prefix(4))
     }
 
-    // Builds a full image URL from TMDB's poster path, using a common size.
     var posterURL: URL? {
         guard let path = posterPath, !path.isEmpty else { return nil }
         // You can adjust the size segment (e.g., w185, w342, w500, original) as needed.
@@ -58,7 +56,6 @@ extension Movie {
         return Locale.current.localizedString(forLanguageCode: code)?.capitalized ?? code
     }
 
-    // Convenience: comma-separated names of production companies (if available)
     var productionCompanyNames: String {
         (productionCompanies ?? []).map { $0.name }.joined(separator: ", ")
     }

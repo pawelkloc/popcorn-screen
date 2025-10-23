@@ -30,7 +30,6 @@ struct MediaRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            // Poster
             ZStack {
                 Rectangle().fill(Color.gray.opacity(0.15))
                 if let posterURL {
@@ -42,7 +41,6 @@ struct MediaRowView: View {
             .posterFrame(.small)
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
-            // Texts
             VStack(alignment: .leading, spacing: .spacing(.xs)) {
                 Text(title)
                     .font(.headline)
