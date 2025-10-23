@@ -1,122 +1,125 @@
-//
-//  MediaDetailsView.swift
-//  PopcornScreen
-//
-//  Unified details screen for Movies & TV Series.
-//
-
 import SwiftUI
 
-// MARK: - Protocol for items that can be shown on the details screen
-protocol MediaDetailsDisplayable {
-    var detailsTitle: String { get }
-    var detailsSubtitle: String? { get }   // year or similar
-    var overview: String { get }
-    var posterURL: URL? { get }
-    var voteAverage: Double? { get }
-}
+struct MediaDetailsView: View {
+    let item: any MediaDisplayable
+    private let genreOverride: String?
 
-// MARK: - Conformances
-extension Movie: MediaDetailsDisplayable {
-    var detailsTitle: String { title }
-    var detailsSubtitle: String? { releaseYear.isEmpty ? nil : releaseYear }
-}
-
-extension TVShow: MediaDetailsDisplayable {
-    var detailsTitle: String { name }
-    var detailsSubtitle: String? {
-        if let year = firstAirYear, !year.isEmpty {
-            return year
-        } else {
-            return nil
-        }
+    init(item: any MediaDisplayable, genreNames: String? = nil) {
+        self.item = item
+        self.genreOverride = genreNames
     }
-}
 
-// MARK: - Unified View
-struct MediaDetailsView<Item: MediaDetailsDisplayable>: View {
-    let item: Item
-    
+    private var genreText: String {
+        let raw = (genreOverride?.isEmpty == false) ? genreOverride! : item.genreNames
+        return raw.replacingOccurrences(of: ",", with: " • ")
+    }
+
+    @State private var isFavorite = false
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Poster
+            ZStack(alignment: .top) {
                 if let url = item.posterURL {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    } placeholder: {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.15))
-                            .frame(height: 300)
-                            .overlay(ProgressView())
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable()
+                                .ignoresSafeArea()
+                                .blur(radius: 30)
+                                .opacity(0.5)
+//                                .clipped()
+                        default:
+                            Color.clear.frame(height: 260)
+                        }
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                
-                // Title and subtitle (year)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.detailsTitle)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .lineLimit(3)
-                    
-                    if let sub = item.detailsSubtitle, !sub.isEmpty {
-                        Text(sub)
-                            .font(.subheadline)
+
+                VStack(spacing: .spacing(.m)) {
+                    if let url = item.posterURL {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image.resizable()
+                                    .scaledToFill()
+                                    .posterFrame(.large)
+                                    .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large.rawValue))
+                                    .shadow(radius: 6)
+                            default:
+                                RoundedRectangle(cornerRadius: CornerRadius.large.rawValue)
+                                    .fill(.secondary.opacity(0.2))
+                            }
+                        }
+                    }
+
+                    HStack(alignment: .center) {
+                        Text(item.titleText)
+                            .font(.title)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Button {
+                            isFavorite.toggle()
+                        } label: {
+                            Image(systemName: isFavorite ? "heart.fill" : "heart")
+                                .imageScale(.large)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(isFavorite ? "Remove from favorites" : "Add to favorites")
+                    }
+
+                    if !genreText.isEmpty {
+                        Text(genreText)
+                            .font(.body)
                             .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                }
-                
-                // Rating
-                if let rating = item.voteAverage {
-                    HStack(spacing: 6) {
-                        Image(systemName: "star.fill")
-                            .foregroundStyle(.yellow)
-                        Text(String(format: "%.1f", rating))
-                            .font(.headline)
+
+                    HStack(spacing: .spacing(.s)) {
+                        if let date = item.releaseDateText, !date.isEmpty { MetaChip(text: date) }
+                        if let run  = item.runtimeText,  !run.isEmpty  { MetaChip(text: run)  }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(alignment: .leading, spacing: .spacing(.s)) {
+                        Section(title: "Description")
+                        if item.overviewText.isEmpty {
+                            Text("No description available.").foregroundStyle(.secondary)
+                        } else {
+                            Text(item.overviewText)
+                        }
+
+                        Section(title: "Language")
+                        if let lang = item.language, !lang.isEmpty {
+                            Text(lang)
+                        } else {
+                            Text("No language available.").foregroundStyle(.secondary)
+                        }
+
+                        Section(title: "Production Companies")
+                        if let companies = item.productionCompaniesText, !companies.isEmpty {
+                            Text(companies)
+                        } else {
+                            Text("No production companies available.").foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
-                // Overview
-                if !item.overview.isEmpty {
-                    Text(item.overview)
-                        .font(.body)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                .padding(.spacing(.m))
             }
-            .padding()
         }
-        .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-#Preview("Movie") {
-    MediaDetailsView(item: Movie(
-        id: 1,
-        title: "Interstellar",
-        overview: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-        releaseDate: "2014-11-07",
-        posterPath: "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-        backdropPath: nil,
-        voteAverage: 8.6,
-        voteCount: 10000,
-        popularity: 100.0,
-        genreIds: [12, 18, 878]
-    ))
-}
-
-#Preview("TV Show") {
-    MediaDetailsView(item: TVShow(
-        id: 100,
-        name: "Dark",
-        overview: "A family saga with a supernatural twist.",
-        posterPath: "/poster.jpg",
-        firstAirDate: "2017-12-01",
-        genreIds: [18, 9648, 10765],
-        firstAirDateFormatted: nil,
-        voteAverage: 8.8
-    ))
+#Preview("Movie details") {
+    struct MockMedia: MediaDisplayable {
+        var id = 1
+        var titleText = "Blade Runner 2049"
+        var genreNames = "Science fiction, Drama"
+        var releaseDateText: String? = "Oct 2017"
+        var runtimeText: String? = "2h 44m"
+        var overviewText = "Thirty years after the events of the first film..."
+        var posterURL: URL? = URL(string: "https://image.tmdb.org/t/p/w500/8.jpg")
+        var language: String? = "English"
+        var productionCompaniesText: String? = "Alcon Entertainment, Columbia Pictures, Scott Free Productions"
+    }
+    return MediaDetailsView(item: MockMedia())
 }

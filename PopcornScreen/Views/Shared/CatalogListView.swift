@@ -23,7 +23,7 @@ struct CatalogListView<Item: Identifiable, Row: View, Destination: View>: View {
     }
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: .spacing(.xxs)) {
             ForEach(items) { item in
                 NavigationLink { destination(item) } label: { row(item) }
             }

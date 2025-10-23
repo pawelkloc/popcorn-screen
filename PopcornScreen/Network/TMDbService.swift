@@ -71,7 +71,6 @@ final class TMDbService {
         self.decoder = decoder
     }
 
-    // wspólne helpery requestu/decodingu
     func request(for endpoint: Endpoint, page: Int? = nil, query: String? = nil, sort: TMDBSortOption? = nil) throws -> URLRequest {
         let components = endpoint.components(baseURL: baseURL, page: page, query: query, sort: sort)
         guard let url = components.url else { throw FetchError.badResponse }

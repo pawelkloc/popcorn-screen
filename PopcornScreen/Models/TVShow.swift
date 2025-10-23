@@ -20,6 +20,8 @@ struct TVShow: Identifiable, Decodable {
     let genreIds: [Int]?
     let firstAirDateFormatted: Date?
     let voteAverage: Double?
+    let originalLanguage: String?
+
 
     // Zbudowany pełny URL do plakatu na podstawie posterPath (tak jak w Movie)
     var posterURL: URL? {
@@ -37,5 +39,14 @@ struct TVShow: Identifiable, Decodable {
             return String(str.prefix(4))
         }
         return nil
+    }
+
+    var languageCode: String {
+        originalLanguage ?? ""
+    }
+
+    var languageDisplayName: String {
+        guard let code = originalLanguage, !code.isEmpty else { return "" }
+        return Locale.current.localizedString(forLanguageCode: code)?.capitalized ?? code
     }
 }

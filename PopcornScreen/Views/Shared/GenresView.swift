@@ -20,19 +20,19 @@ struct GenresView<VM: GenresViewModeling>: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+            HStack(spacing: .spacing(.xs)) {
                 let isAllSelected = viewModel.selectedGenreIDs.isEmpty
 
                 Button {
                     viewModel.clearGenres()
                 } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: .spacing(.xs)) {
                         Text("All")
                             .font(.callout)
                             .fontWeight(.regular)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, .spacing(.s))
+                    .padding(.vertical, .spacing(.xs))
                     .foregroundStyle(.black)
                     .background(
                         Capsule().fill(isAllSelected ? .yellow : .clear)
@@ -50,16 +50,16 @@ struct GenresView<VM: GenresViewModeling>: View {
                     Button {
                         viewModel.clearGenres()
                     } label: {
-                        HStack(spacing: 6) {
+                        HStack(spacing: .spacing(.xs)) {
                             Image(systemName: "xmark.circle.fill")
                             Text("Clear")
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, .spacing(.s))
+                        .padding(.vertical, .spacing(.xs))
                     }
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, .spacing(.xs))
         }
         .task { await viewModel.loadGenres() }
     }
@@ -69,7 +69,7 @@ struct GenresView<VM: GenresViewModeling>: View {
         return Button {
             viewModel.toggleGenre(genre.id)
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: .spacing(.xs)) {
                 Text(genre.name)
                     .font(.callout)
                     .fontWeight(.regular)
@@ -78,8 +78,8 @@ struct GenresView<VM: GenresViewModeling>: View {
                         .imageScale(.small)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, .spacing(.s))
+            .padding(.vertical, .spacing(.xs))
             .foregroundStyle(.black)
             .background(
                 Capsule().fill(isSelected ? .yellow : .clear)

@@ -24,7 +24,7 @@ struct MoviesView: View {
                         }
                     }
                 )
-                .padding(.vertical, 16)
+                .padding(.vertical, .spacing(.s))
 
                 HStack {
                     Text("Movies")
@@ -41,11 +41,11 @@ struct MoviesView: View {
                             viewModel.applySort(nil)
                         },
                         onReload: {
-                            // To powoduje ponowne pobranie oryginalnej listy po Reset
                             viewModel.loadPopularMovies()
                         }
                     )
                 }
+                .padding(.vertical, .spacing(.s))
 
                 GenresView(viewModel: viewModel)
 
@@ -65,7 +65,7 @@ struct MoviesView: View {
                         )
                         .frame(maxWidth: .infinity, alignment: .center)
                     } else {
-                        VStack(spacing: 12) {
+                        VStack(spacing: .spacing(.xs)) {
                             ForEach(viewModel.filteredMovies) { movie in
                                 NavigationLink {
                                     MediaDetailsView(item: movie)
@@ -81,7 +81,7 @@ struct MoviesView: View {
                                 }
                             }
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, .spacing(.s))
                     }
                 }
                 .refreshable {
@@ -89,7 +89,7 @@ struct MoviesView: View {
                     viewModel.loadPopularMovies()
                 }
             }
-            .padding(12)
+            .padding(.spacing(.s))
         }
         .task {
             await viewModel.loadGenres()

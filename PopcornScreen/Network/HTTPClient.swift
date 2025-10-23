@@ -5,7 +5,6 @@
 //  Created by Paweł Kloc on 22/10/2025.
 //
 
-
 import Foundation
 
 protocol HTTPClient {

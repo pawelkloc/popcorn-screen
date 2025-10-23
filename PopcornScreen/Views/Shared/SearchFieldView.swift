@@ -65,11 +65,11 @@ struct SearchFieldView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(RoundedRectangle(cornerRadius: 24).fill(.regularMaterial))
+        .padding(.horizontal, .spacing(.xs))
+        .padding(.vertical, .spacing(.xs))
+        .background(RoundedRectangle(cornerRadius: CornerRadius.large.rawValue).fill(.regularMaterial))
         .overlay(
-            RoundedRectangle(cornerRadius: 24).stroke(.quaternary, lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: CornerRadius.large.rawValue).stroke(.quaternary, lineWidth: 0.5)
         )
         .animation(.snappy, value: searchText.isEmpty)
         .task { if autofocus { isFocused = true } }

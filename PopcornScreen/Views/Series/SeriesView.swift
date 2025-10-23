@@ -25,7 +25,7 @@ struct SeriesView: View {
                         }
                     }
                 )
-                .padding(.vertical, 16)
+                .padding(.vertical, .spacing(.s))
 
                 HStack {
                     Text("Series")
@@ -47,6 +47,7 @@ struct SeriesView: View {
                         }
                     )
                 }
+                .padding(.vertical, .spacing(.s))
 
                 GenresView(viewModel: viewModel)
 
@@ -66,7 +67,7 @@ struct SeriesView: View {
                         )
                         .frame(maxWidth: .infinity, alignment: .center)
                     } else {
-                        VStack(spacing: 12) {
+                        VStack(spacing:.spacing(.xs)) {
                             ForEach(viewModel.filteredSeries) { show in
                                 NavigationLink {
                                     MediaDetailsView(item: show)
@@ -82,7 +83,7 @@ struct SeriesView: View {
                                 }
                             }
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, .spacing(.s))
                     }
                 }
                 .refreshable {
@@ -90,7 +91,7 @@ struct SeriesView: View {
                     viewModel.loadPopularSeries()
                 }
             }
-            .padding(12)
+            .padding(.spacing(.s))
         }
         .task {
             await viewModel.loadGenres()

@@ -29,7 +29,7 @@ struct MediaRowView: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 16) {
             // Poster
             ZStack {
                 Rectangle().fill(Color.gray.opacity(0.15))
@@ -39,18 +39,18 @@ struct MediaRowView: View {
                     } placeholder: { ProgressView() }
                 }
             }
-            .frame(width: 80, height: 120)
+            .posterFrame(.small)
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             // Texts
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: .spacing(.xs)) {
                 Text(title)
                     .font(.headline)
-                    .lineLimit(2)
+                    .lineLimit(1)
 
                 if let subtitle, !subtitle.isEmpty {
                     Text(subtitle)
-                        .font(.subheadline)
+                        .font(.headline)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -59,31 +59,32 @@ struct MediaRowView: View {
 
                 if let genres, !genres.isEmpty {
                     Text(genres.joined(separator: ", "))
-                        .font(.caption)
+                        .font(.body)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .truncationMode(.tail)
                 }
 
                 if let rating {
-                    HStack(spacing: 6) {
+                    HStack(spacing: .spacing(.xs)) {
                         Image(systemName: "star.fill")
+                            .foregroundStyle(.yellow)
                         Text(String(format: "%.1f", rating))
+                            .foregroundStyle(.darkGray)
+                            .font(.body)
                     }
-                    .font(.footnote)
-                    .foregroundStyle(.yellow)
+                    .padding(.vertical, .spacing(.xxs))
                 }
             }
+            .padding(.vertical, .spacing(.xxs))
             Spacer()
         }
-        .padding(.vertical, 8)
     }
 }
 
 #Preview {
     MediaRowView(
         title: "Interstellar",
-        subtitle: "2014 • Sci-Fi",
+        subtitle: "2014",
         rating: 8.6,
         posterURL: URL(string: "https://image.tmdb.org/t/p/w185/placeholder.jpg"),
         genres: ["Adventure", "Drama", "Sci‑Fi"]

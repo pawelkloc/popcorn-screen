@@ -50,6 +50,13 @@ final class MoviesViewModel: ObservableObject {
         genres(for: movie).map(\.name).joined(separator: ", ")
     }
 
+    func movieLanguage(for movie: Movie, localized: Bool = true, locale: Locale = .current) -> String {
+        let code = movie.originalLanguage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !code.isEmpty else { return "" }
+        guard localized else { return code }
+        return locale.localizedString(forLanguageCode: code)?.capitalized ?? code
+    }
+
     func setSelectedGenres(_ ids: Set<Int>) {
         selectedGenreIDs = ids
         filterMovies()
