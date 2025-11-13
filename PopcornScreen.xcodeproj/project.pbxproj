@@ -15,16 +15,28 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Network/TMDBDecoder.swift,
 			);
 			target = 4195EC282E4110C000E881E5 /* PopcornScreen */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		41236E032EA8BC8200F74809 /* Exceptions for "PopcornScreen" folder in "Copy Bundle Resources" phase from "PopcornScreen" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 4195EC272E4110C000E881E5 /* Resources */;
+			membershipExceptions = (
+				Network/TMDBDecoder.swift,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4195EC2B2E4110C000E881E5 /* PopcornScreen */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				41D1B35E2E4A216600AFECDC /* Exceptions for "PopcornScreen" folder in "PopcornScreen" target */,
+				41236E032EA8BC8200F74809 /* Exceptions for "PopcornScreen" folder in "Copy Bundle Resources" phase from "PopcornScreen" target */,
 			);
 			path = PopcornScreen;
 			sourceTree = "<group>";

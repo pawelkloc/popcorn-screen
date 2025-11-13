@@ -16,11 +16,14 @@ class SearchViewModel: ObservableObject {
     @Published var isSearching: Bool = false
     @Published var errorMessage: String?
 
-    private let service: TMDbService
+    private let movieService: MovieService
+    private let tvService: TVService
     private var cancellables = Set<AnyCancellable>()
 
-    init(service: TMDbService = .shared) {
-        self.service = service
+    // Designated initializer without default arguments
+    init(movieService: MovieService, tvService: TVService) {
+        self.movieService = movieService
+        self.tvService = tvService
 
         $query
             .removeDuplicates()
@@ -29,7 +32,12 @@ class SearchViewModel: ObservableObject {
                 self?.handleQueryChange(newQuery)
             }
             .store(in: &cancellables)
+    }
 
+    // Convenience initializer that constructs one shared TMDbService for both protocols
+    convenience init() {
+        let service = TMDbService()
+        self.init(movieService: TMDbService(), tvService: TMDbService())
     }
 
     private func handleQueryChange(_ newQuery: String) {
@@ -49,16 +57,20 @@ class SearchViewModel: ObservableObject {
         errorMessage = nil
         Task {
             do {
-                async let mov: [Movie] = service.searchMovies(query: query)
-                async let sho: [TVShow] = service.searchTV(query: query)
+                async let mov: [Movie] = movieService.searchMovies(query, page: page)
+                async let sho: [TVShow] = tvService.searchShows(query, page: page)
                 let (movie, show) = try await (mov, sho)
-                self.movies = movie
-                self.shows = show
-                self.isSearching = false
+                await MainActor.run {
+                    self.movies = movie
+                    self.shows = show
+                    self.isSearching = false
+                }
             } catch {
                 print("Error searching: \(error)")
-                self.errorMessage = "Failed to search"
-                self.isSearching = false
+                await MainActor.run {
+                    self.errorMessage = "Failed to search"
+                    self.isSearching = false
+                }
             }
         }
     }
