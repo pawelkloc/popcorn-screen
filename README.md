@@ -2,7 +2,7 @@
 
 An iOS app for browsing and saving your favorite movies and TV series.
 
-<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2025-11-24 at 13 47 53" src="https://github.com/user-attachments/assets/aaedaea1-505b-4939-9524-033b0c1145b2" />
+<img width="201" height="437" alt="Simulator Screenshot - iPhone 17 Pro - 2025-11-24 at 13 47 53" src="https://github.com/user-attachments/assets/aaedaea1-505b-4939-9524-033b0c1145b2" />
 
 
 ## Data source
