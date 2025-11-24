@@ -2,7 +2,7 @@
 
 An iOS app for browsing and saving your favorite movies and TV series.
 
-<img width="522" height="922" alt="Zrzut ekranu 2025-11-24 o 13 54 21" src="https://github.com/user-attachments/assets/f45b4410-9374-4fac-934b-7caba5d67f81" />
+<img width="261" height="461" alt="Zrzut ekranu 2025-11-24 o 13 54 21" src="https://github.com/user-attachments/assets/f45b4410-9374-4fac-934b-7caba5d67f81" />
 
 
 
